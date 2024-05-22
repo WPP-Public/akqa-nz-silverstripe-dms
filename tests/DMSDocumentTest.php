@@ -10,6 +10,7 @@ use SilverStripe\Forms\GridField\GridFieldAddNewButton;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Forms\CompositeField;
 use SilverStripe\Security\Member;
+use SilverStripe\Security\Security;
 use Sunnysideup\DMS\DMS;
 use SilverStripe\Dev\SapphireTest;
 
@@ -263,7 +264,7 @@ class DMSDocumentTest extends SapphireTest
      */
     protected function logoutMember()
     {
-        if ($member = Member::currentUser()) {
+        if ($member = Security::getCurrentUser()) {
             $member->logOut();
         }
     }
