@@ -21,12 +21,12 @@ DMSDocument:
   h_d_1:
     Title: Home Default 1
     Filename: home-default-1
-    Sets: =>DMSDocumentSet.home_default
+    Sets: =>Sunnysideup\DMS\Model\DMSDocumentSet.home_default
   h_a_2:
     Title: Home Default 2
     Filename: home-default-2
-    Sets: =>DMSDocumentSet.home_alt
+    Sets: =>Sunnysideup\DMS\Model\DMSDocumentSet.home_alt
   a_d_1:
     Title: About Default 1
     Filename: about-default-1
-    Sets: =>DMSDocumentSet.about_default
+    Sets: =>Sunnysideup\DMS\Model\DMSDocumentSet.about_default

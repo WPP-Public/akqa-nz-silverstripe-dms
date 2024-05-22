@@ -18,6 +18,7 @@
     "require": {
         "silverstripe/cms": "^4.0 || ^5.0",
         "symbiote/silverstripe-gridfieldextensions": "*",
+        "silverstripe/asset-admin": "*",
         "silverstripe/taxonomy": "*"
     },
     "suggest": {

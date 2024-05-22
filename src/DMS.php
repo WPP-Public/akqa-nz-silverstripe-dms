@@ -9,4 +9,6 @@ class DMS
     use Configurable;
 
     private static $folder_name = 'dms';
+
+    private static $shortcode_handler_key = 'dms';
 }

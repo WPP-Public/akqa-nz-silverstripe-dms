@@ -42,6 +42,7 @@ use Sunnysideup\DMS\Interfaces\DMSDocumentInterface;
 use Sunnysideup\DMS\Admin\DMSDocumentAdmin;;
 
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Security\Security;
 
 /**
  * @package dms
@@ -373,12 +374,12 @@ class DMSDocument extends File implements DMSDocumentInterface
 
     public function onBeforeWrite()
     {
-        // Set user fields
-        if ($currentUserID = Member::currentUserID()) {
+        if ($currentUser = Security::getCurrentUser()) {
             if (!$this->CreatedByID) {
-                $this->CreatedByID = $currentUserID;
+                $this->CreatedByID = $currentUser->ID;
             }
-            $this->LastEditedByID = $currentUserID;
+
+            $this->LastEditedByID = $currentUser->ID;
         }
 
         if ($this->TempFileID) {

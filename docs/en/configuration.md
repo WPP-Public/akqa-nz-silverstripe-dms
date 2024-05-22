@@ -12,9 +12,8 @@ project root directory:
 
 ```yaml
 DMS:
-  folder_name: my-custom-folder
+    folder_name: my-custom-folder
 ```
-
 
 ## Enable/disable documents/sets for a specific page type
 
@@ -22,7 +21,7 @@ If you don't need documents/document sets for a specific page type you can disab
 
 ```yaml
 MyPageType:
-  documents_enabled: false
+    documents_enabled: false
 ```
 
 Likewise, you could override a previously set configuration value by setting this back to `true` in a configuration
@@ -38,12 +37,13 @@ To add extra allowed file extensions purely for DMS documents, you can update th
 
 ```yaml
 DMSDocumentAddController:
-  allowed_extensions:
-    - php
-    - php5
+    allowed_extensions:
+        - php
+        - php5
 ```
 
 ## Adding fields to the Query Builder
+
 Query builder fields are read from the DMSDocument::searchable_fields property set in [querybuilder.yml](../../_config/querybuilder.yml). Some default fields are provided and can be customised
 by modifying the field and/or filter properties of a field or adding a new field entirely.
 
@@ -54,21 +54,21 @@ The default searchable filters available to query builder is as follows:
 
 ```yaml
 DMSDocument:
-  searchable_fields:
-    Title:
-      title: "Document title matches ..."
-    Description:
-      title: "Document summary matches ..."
-    CreatedByID:
-      title: 'Document created by ...'
-      field: 'ListboxField'
-      filter: 'ExactMatchFilter'
-    LastEditedByID:
-      title: 'Document last changed by ...'
-      field: 'ListboxField'
-      filter: 'ExactMatchFilter'
-    Filename:
-      title: 'File name'
+    searchable_fields:
+        Title:
+            title: "Document title matches ..."
+        Description:
+            title: "Document summary matches ..."
+        CreatedByID:
+            title: "Document created by ..."
+            field: "ListboxField"
+            filter: "ExactMatchFilter"
+        LastEditedByID:
+            title: "Document last changed by ..."
+            field: "ListboxField"
+            filter: "ExactMatchFilter"
+        Filename:
+            title: "File name"
 ```
 
 ## Change the shortcode handler
@@ -77,15 +77,18 @@ If you need to change the `dms_document_link` shortcode handler for some reason,
 and some PHP:
 
 ```yaml
-DMS:
-  shortcode_handler_key: your_shortcode
+Sunnysideup\DMS\DMS:
+    shortcode_handler_key: your_shortcode
 ```
 
 And for example in `_config.php`:
 
 ```php
+use Sunnysideup\DMS\DMS;
+use Sunnysideup\DMS\DMSShortcodeHandler;
+
 ShortcodeParser::get('default')->register(
-    Config::inst()->get('DMS', 'shortcode_handler_key'),
-    array('DMSShortcodeHandler', 'handle')
+    Config::inst()->get(DMS::class, 'shortcode_handler_key'),
+    [DMSShortcodeHandler::class, 'handle']
 );
 ```

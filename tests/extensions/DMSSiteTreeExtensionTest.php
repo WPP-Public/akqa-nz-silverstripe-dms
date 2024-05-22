@@ -1,5 +1,7 @@
 <?php
 
+namespace Sunnysideup\DMS\Tests\Extensions;
+
 use Sunnysideup\DMS\Extensions\DMSSiteTreeExtension;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\CMS\Model\SiteTree;
@@ -28,7 +30,7 @@ class DMSSiteTreeExtensionTest extends SapphireTest
      */
     public function testCanDisableDocumentSetsTab($configSetting, $assertionMethod)
     {
-        Config::modify()->update(SiteTree::class, 'documents_enabled', $configSetting);
+        Config::modify()->set(SiteTree::class, 'documents_enabled', $configSetting);
         $siteTree = $this->objFromFixture(SiteTree::class, 's2');
         $this->$assertionMethod($siteTree->getCMSFields()->fieldByName('Root.DocumentSets.DocumentSets'));
     }
@@ -51,7 +53,7 @@ class DMSSiteTreeExtensionTest extends SapphireTest
      */
     public function testDocumentSetsGridFieldIsCorrectlyConfigured()
     {
-        Config::modify()->update(SiteTree::class, 'documents_enabled', true);
+        Config::modify()->set(SiteTree::class, 'documents_enabled', true);
         $siteTree = $this->objFromFixture(SiteTree::class, 's2');
         $gridField = $siteTree->getCMSFields()->fieldByName('Root.DocumentSets.DocumentSets');
 

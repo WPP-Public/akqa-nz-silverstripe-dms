@@ -1,5 +1,7 @@
 <?php
 
+namespace Sunnysideup\DMS\Tests;
+
 use Sunnysideup\DMS\Model\DMSDocument;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Forms\GridField\GridField;
@@ -14,19 +16,6 @@ use SilverStripe\Dev\SapphireTest;
 class DMSDocumentTest extends SapphireTest
 {
     protected static $fixture_file = 'dmstest.yml';
-
-    // public function testDefaultDownloadBehabiourCMSFields()
-    // {
-    //     $document = singleton(DMSDocument::class);
-    //     Config::modify()->update(DMSDocument::class, 'default_download_behaviour', 'open');
-    //     $cmsFields = $document->getCMSFields();
-    //     $this->assertEquals('open', $cmsFields->dataFieldByName('DownloadBehavior')->Value());
-    //
-    //
-    //     Config::modify()->update(DMSDocument::class, 'default_download_behaviour', 'download');
-    //     $cmsFields = $document->getCMSFields();
-    //     $this->assertEquals('download', $cmsFields->dataFieldByName('DownloadBehavior')->Value());
-    // }
 
     /**
      * Ensure that related documents can be retrieved for a given DMS document
@@ -147,7 +136,7 @@ class DMSDocumentTest extends SapphireTest
         $this->assertContains('permission', $result);
         $this->assertContains('Example', $result);
 
-        $actions = ['example', 'embargo','find-usage'];
+        $actions = ['example', 'embargo', 'find-usage'];
         foreach ($actions as $action) {
             // Test remove with string
             $document->removeActionPanelTask($action);

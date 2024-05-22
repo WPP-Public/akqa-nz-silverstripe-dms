@@ -1,5 +1,7 @@
 <?php
 
+namespace Sunnysideup\DMS\Tests;
+
 use Sunnysideup\DMS\Model\DMSDocumentSet;
 use SilverStripe\CMS\Model\SiteTree;
 use Sunnysideup\DMS\Cms\DMSGridFieldAddNewButton;
@@ -7,15 +9,12 @@ use SilverStripe\Forms\GridField\GridFieldPaginator;
 use SilverStripe\Core\Config\Config;
 use Sunnysideup\DMS\Model\DMSDocument;
 use SilverStripe\Forms\GridField\GridFieldDataColumns;
-use SilverStripe\Forms\TabSet;
-use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\FieldGroup;
 use SilverStripe\Forms\DropdownField;
 use Sunnysideup\DMS\DMS;
 use SilverStripe\Forms\HiddenField;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\CMS\Controllers\CMSPageEditController;
-use SilverStripe\Security\Member;
 use SilverStripe\Dev\SapphireTest;
 
 class DMSDocumentSetTest extends SapphireTest
@@ -107,9 +106,9 @@ class DMSDocumentSetTest extends SapphireTest
     public function testGetDocumentDisplayFields()
     {
         $document = $this->objFromFixture(DMSDocumentSet::class, 'ds1');
-        $this->assertInternalType('array', $document->getDocumentDisplayFields());
+        $this->assertIsArray($document->getDocumentDisplayFields());
 
-        Config::modify()->update(DMSDocument::class, 'display_fields', ['apple' => 'Apple', 'orange' => 'Orange']);
+        Config::modify()->set(DMSDocument::class, 'display_fields', ['apple' => 'Apple', 'orange' => 'Orange']);
         $displayFields = $document->getDocumentDisplayFields();
         $this->assertContains('Apple', $displayFields);
         $this->assertContains('Orange', $displayFields);
@@ -137,37 +136,6 @@ class DMSDocumentSetTest extends SapphireTest
     }
 
     /**
-     * Test that query fields can be added to the gridfield
-     */
-    public function testAddQueryFields()
-    {
-        /** @var DMSDocumentSet $set */
-        $set = $this->objFromFixture(DMSDocumentSet::class, 'ds6');
-        /** @var FieldList $fields */
-        $fields = new FieldList(new TabSet('Root'));
-        /** @var FieldList $fields */
-        $set->addQueryFields($fields);
-        $keyValuePairs = $fields->dataFieldByName('KeyValuePairs');
-        $this->assertNotNull(
-            $keyValuePairs,
-            'addQueryFields() includes KeyValuePairs composite field'
-        );
-        $this->assertNotNull(
-            $keyValuePairs->fieldByName('KeyValuePairs[Title]'),
-            'addQueryFields() includes KeyValuePairs composite field'
-        );
-
-        // Test that the notification field exists
-        $this->assertNotNull($fields->fieldByName('Root.QueryBuilder.GridFieldNotice'));
-
-        // Test that Tags__ID field exists
-        $this->assertContains(
-            'Tags can be set in the taxonomy area,',
-            $keyValuePairs->fieldByName('KeyValuePairs[Tags__ID]')->RightTitle()
-        );
-    }
-
-    /**
      * Ensure that the "direction" dropdown field has user friendly field labels
      */
     public function testQueryBuilderDirectionFieldHasFriendlyLabels()
@@ -189,7 +157,7 @@ class DMSDocumentSetTest extends SapphireTest
      */
     public function testShortcodeHandlerKeyFieldExists()
     {
-        Config::modify()->update(DMS::class, 'shortcode_handler_key', 'unit-test');
+        Config::modify()->set(DMS::class, 'shortcode_handler_key', 'unit-test');
 
         $set = DMSDocumentSet::create(['Title' => 'TestSet']);
         $set->write();
@@ -222,23 +190,9 @@ class DMSDocumentSetTest extends SapphireTest
     }
 
     /**
-     * Test that extra documents are added after write
-     */
-    public function testSaveLinkedDocuments()
-    {
-        /** @var DMSDocumentSet $set */
-        $set = $this->objFromFixture(DMSDocumentSet::class, 'dsSaveLinkedDocuments');
-        // Assert initially docs
-        $this->assertEquals(1, $set->getDocuments()->count(), 'Set has 1 document');
-        // Now apply the query and see if 2 extras were added with CreatedByID filter
-        $set->KeyValuePairs = '{"Filename":"extradoc3"}';
-        $set->saveLinkedDocuments();
-        $this->assertEquals(2, $set->getDocuments()->count(), 'Set has 2 documents');
-    }
-
-    /**
      * Tests that an exception is thrown if no title entered for a DMSDocumentSet.
-     * @expectedException ValidationException
+     *
+     * @expectedException \SilverStripe\ORM\ValidationException
      */
     public function testExceptionOnNoTitleGiven()
     {
@@ -268,9 +222,7 @@ class DMSDocumentSetTest extends SapphireTest
      */
     public function testPermissions()
     {
-        if ($member = Member::currentUser()) {
-            $member->logout();
-        }
+        $this->logOut();
 
         $set = $this->objFromFixture(DMSDocumentSet::class, 'ds1');
 

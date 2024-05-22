@@ -1,5 +1,7 @@
 <?php
 
+namespace Sunnysideup\DMS\Tests\Extensions;
+
 use Sunnysideup\DMS\Extensions\DMSDocumentTaxonomyExtension;
 use SilverStripe\Dev\SapphireTest;
 
@@ -7,21 +9,12 @@ class DMSDocumentTaxonomyExtensionTest extends SapphireTest
 {
     protected static $fixture_file = 'DMSDocumentTaxonomyExtensionTest.yml';
 
-    public function setUp(): void
-    {
-        parent::setUp();
-
-        if (!class_exists('TaxonomyType')) {
-            $this->markTestSkipped('This test requires silverstripe/taxonomy ^1.2 to be installed. Skipping.');
-        }
-    }
-
     /**
      * Ensure that appropriate tags by taxonomy type are returned, and that their hierarchy is displayd in the title
      */
     public function testGetAllTagsMap()
     {
-        $extension = new DMSDocumentTaxonomyExtension;
+        $extension = new DMSDocumentTaxonomyExtension();
         $result = $extension->getAllTagsMap();
 
         $this->assertContains('Subject > Mathematics', $result);

@@ -26,7 +26,7 @@ SilverStripe\CMS\Model\SiteTree:
   s9:
     Title: testPage9
     URLSegment: s9
-Group:
+SilverStripe\Security\Group:
   content-author:
     Code: content-author
     Title: "Content Author"
@@ -36,86 +36,83 @@ Group:
 SilverStripe\Security\Member:
   editor:
     Name: editor
-    Groups: =>Group.content-author
+    Groups: =>SilverStripe\Security\Group.content-author
   non-editor:
     Name: cable-guy
-    Groups: =>Group.cable-guy
-DMSDocumentSet:
+    Groups: =>SilverStripe\Security\Group.cable-guy
+Sunnysideup\DMS\Model\DMSDocumentSet:
   ds1:
     Title: Document Set 1
-    Page: =>SiteTree.s1
+    Page: =>SilverStripe\CMS\Model\SiteTree.s1
   ds2:
     Title: Document Set 2
-    Page: =>SiteTree.s1
+    Page: =>SilverStripe\CMS\Model\SiteTree.s1
   ds3:
     Title: Document Set 3
-    Page: =>SiteTree.s2
+    Page: =>SilverStripe\CMS\Model\SiteTree.s2
   ds4:
     Title: Set containing embargoed documents
-    Page: =>SiteTree.s3
+    Page: =>SilverStripe\CMS\Model\SiteTree.s3
   ds5:
     Title: Set containing embargoed until publish documents
-    Page: =>SiteTree.s7
+    Page: =>SilverStripe\CMS\Model\SiteTree.s7
   ds6:
     Title: Test Set 6
-    Page: =>SiteTree.s8
-  dsSaveLinkedDocuments:
-    Title: Test Set 6
-    Page: =>SiteTree.s9
+    Page: =>SilverStripe\CMS\Model\SiteTree.s8
   unlinked_set:
     Title: Document Set not linked
-DMSDocument:
+Sunnysideup\DMS\Model\DMSDocument:
   d1:
     Filename: test-file-file-doesnt-exist-1
     Folder: 5
-    Sets: =>DMSDocumentSet.ds1, =>DMSDocumentSet.ds2, =>DMSDocumentSet.ds3, =>DMSDocumentSet.ds4
+    Sets: =>Sunnysideup\DMS\Model\DMSDocumentSet.ds1, =>Sunnysideup\DMS\Model\DMSDocumentSet.ds2, =>Sunnysideup\DMS\Model\DMSDocumentSet.ds3, =>Sunnysideup\DMS\Model\DMSDocumentSet.ds4
   d2:
     Filename: test-file-file-doesnt-exist-2
     Folder: 5
     Title: File That Doesn't Exist (Title)
-    Sets: =>DMSDocumentSet.ds1, =>DMSDocumentSet.ds2, =>DMSDocumentSet.ds3, =>DMSDocumentSet.ds4
+    Sets: =>Sunnysideup\DMS\Model\DMSDocumentSet.ds1, =>Sunnysideup\DMS\Model\DMSDocumentSet.ds2, =>Sunnysideup\DMS\Model\DMSDocumentSet.ds3, =>Sunnysideup\DMS\Model\DMSDocumentSet.ds4
   document_with_relations:
     Filename: file-with-relations
     Folder: 5
-    RelatedDocuments: =>DMSDocument.d1, =>DMSDocument.d2
+    RelatedDocuments: =>Sunnysideup\DMS\Model\DMSDocument.d1, =>Sunnysideup\DMS\Model\DMSDocument.d2
   doc-logged-in-users:
     FileName: doc-logged-in-users
     CanViewType: LoggedInUsers
     CanEditType: LoggedInUsers
     Folder: 5
-    Sets: =>DMSDocumentSet.ds1, =>DMSDocumentSet.ds2, =>DMSDocumentSet.ds3, =>DMSDocumentSet.ds4
+    Sets: =>Sunnysideup\DMS\Model\DMSDocumentSet.ds1, =>Sunnysideup\DMS\Model\DMSDocumentSet.ds2, =>Sunnysideup\DMS\Model\DMSDocumentSet.ds3, =>Sunnysideup\DMS\Model\DMSDocumentSet.ds4
   doc-anyone:
     FileName: doc-anyone
     CanViewType: Anyone
     Folder: 5
-    Sets: =>DMSDocumentSet.ds1, =>DMSDocumentSet.ds2, =>DMSDocumentSet.ds3, =>DMSDocumentSet.ds4
+    Sets: =>Sunnysideup\DMS\Model\DMSDocumentSet.ds1, =>Sunnysideup\DMS\Model\DMSDocumentSet.ds2, =>Sunnysideup\DMS\Model\DMSDocumentSet.ds3, =>Sunnysideup\DMS\Model\DMSDocumentSet.ds4
   doc-only-these-users:
     FileName: doc-only-these-users
     CanViewType: OnlyTheseUsers
     CanEditType: OnlyTheseUsers
     Folder: 5
-    Sets: =>DMSDocumentSet.ds1, =>DMSDocumentSet.ds2, =>DMSDocumentSet.ds3, =>DMSDocumentSet.ds4
-    ViewerGroups: =>Group.content-author
-    EditorGroups: =>Group.content-author
+    Sets: =>Sunnysideup\DMS\Model\DMSDocumentSet.ds1, =>Sunnysideup\DMS\Model\DMSDocumentSet.ds2, =>Sunnysideup\DMS\Model\DMSDocumentSet.ds3, =>Sunnysideup\DMS\Model\DMSDocumentSet.ds4
+    ViewerGroups: =>SilverStripe\Security\Group.content-author
+    EditorGroups: =>SilverStripe\Security\Group.content-author
   embargoed_document1:
     Filename: foobar
     EmbargoedIndefinitely: true
     Folder: 5
-    Sets: =>DMSDocumentSet.ds4
+    Sets: =>Sunnysideup\DMS\Model\DMSDocumentSet.ds4
   embargo_until_publish1:
     Filename: embargo-until-publish1
     EmbargoUntilPublish: true
     Folder: 5
-    Sets: =>DMSDocumentSet.ds5
+    Sets: =>Sunnysideup\DMS\Model\DMSDocumentSet.ds5
   embargo_until_publish2:
     Filename: embargo-until-publish2
     EmbargoUntilPublish: true
     Folder: 5
-    Sets: =>DMSDocumentSet.ds5
+    Sets: =>Sunnysideup\DMS\Model\DMSDocumentSet.ds5
   extraDoc1:
     Filename: extradoc1
     Folder: 5
-    Sets: =>DMSDocumentSet.ds6
+    Sets: =>Sunnysideup\DMS\Model\DMSDocumentSet.ds6
     ManuallyAdded: 1
     CreatedByID: 2
   extraDoc2:
@@ -128,7 +125,3 @@ DMSDocument:
     Folder: 5
     ManuallyAdded: 0
     CreatedByID: 2
-  docSaveLinkedDocuments1:
-    Filename: saveLinkedDocument1
-    Folder: 5
-    Sets: =>DMSDocumentSet.dsSaveLinkedDocuments

@@ -1,5 +1,7 @@
 <?php
 
+namespace Sunnysideup\DMS\Tests\Cms;
+
 use Sunnysideup\DMS\Cms\DMSDocumentAddController;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Control\HTTPRequest;

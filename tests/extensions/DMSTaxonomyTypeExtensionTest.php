@@ -1,5 +1,7 @@
 <?php
 
+namespace Sunnysideup\DMS\Tests\Extensions;
+
 use Sunnysideup\DMS\Extensions\DMSTaxonomyTypeExtension;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Dev\SapphireTest;
