@@ -13,9 +13,9 @@ use SilverStripe\ORM\DataExtension;
 
 class DMSSettings extends DataExtension
 {
-    private static $has_one = array(
+    private static $has_one = [
         'DMSFolder' => Folder::class
-    );
+    ];
 
     /**
      * Returns the fields that should be rendered in the admin module.
@@ -31,8 +31,8 @@ class DMSSettings extends DataExtension
                 'DMS Documents Folder',
                 Folder::get()->filter(['ParentID' => 0])
             )
-            ->setEmptyString('--- Please select a folder --- ')
-            ->setRightTitle('All DMS documents will be stored in either this folder or a child folder of this folder')
+                ->setEmptyString('--- Please select a folder --- ')
+                ->setRightTitle('All DMS documents will be stored in either this folder or a child folder of this folder')
         );
         return $fields;
     }

@@ -3,13 +3,9 @@
 namespace Sunnysideup\DMS\Control;
 
 use SilverStripe\Security\Permission;
-use InvalidArgumentException;
-
 use SilverStripe\Versioned\Versioned;
 use SilverStripe\Core\Convert;
 use SilverStripe\Control\Director;
-use Sunnysideup\DMS\Model\DMSDocument_versions;
-use SilverStripe\ORM\DataObject;
 use Sunnysideup\DMS\Model\DMSDocument;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\Controller;
@@ -23,9 +19,9 @@ class DMSDocumentController extends Controller
      */
     protected static $testMode = false;
 
-    private static $allowed_actions = array(
+    private static $allowed_actions = [
         'index' => true
-    );
+    ];
 
     public function init()
     {
@@ -48,7 +44,7 @@ class DMSDocumentController extends Controller
         }
         $doc = $this->getDocumentFromID($request);
 
-        if (! empty($doc)) {
+        if (!empty($doc)) {
             $canView = $doc->canView();
 
             if ($canView) {
@@ -72,7 +68,7 @@ class DMSDocumentController extends Controller
                         $ext = $doc->getExtension();
                         if ($ext == 'pdf') {
                             $mime = 'application/pdf';
-                        } elseif ($ext == 'html' || $ext =='htm') {
+                        } elseif ($ext == 'html' || $ext == 'htm') {
                             $mime = 'text/html';
                         } else {
                             $mime = 'application/octet-stream';
@@ -83,14 +79,7 @@ class DMSDocumentController extends Controller
                         return $path;
                     }
 
-                    // set fallback if no config nor file-specific value
                     $disposition = 'attachment';
-
-                    // file-specific setting
-
-
-                    //if a DMSDocument can be downloaded and all the permissions/privileges has passed,
-
                     return $this->sendFile($path, $mime, $doc->Name, $disposition);
                 }
             }
@@ -117,6 +106,7 @@ class DMSDocumentController extends Controller
         $id = Convert::raw2sql($request->param('ID'));
         $versionID = Convert::raw2sql($request->param('VersionID'));
         $isLegacyLink = true;
+
         //new scenario with version and id
         if ($versionID === 'latest') {
             $versionID = 0;
@@ -138,23 +128,15 @@ class DMSDocumentController extends Controller
         $id = $this->getDocumentIdFromSlug($id);
 
         if ($versionID || $oldCaseVersioning) {
-            //todo: UPGRADE: getting versionID
-            if ($oldCaseVersioning) {
-                //use $id to find version
-            } else {
-                //new school approach
-                //use $id and $versionID to find version.
-            }
             $this->extend('updateVersionFromID', $doc, $request);
         } elseif ($id && $isLegacyLink) {
-            //backwards compatibility - fall back to OriginalDMSDocumentIDFile
             $doc = DMSDocument::get()
                 ->filter(['OriginalDMSDocumentIDFile' => intval($id)])
                 ->first();
+
             $this->extend('updateDocumentFromIDLegacyLink', $doc, $request);
             $this->extend('updateDocumentFromID', $doc, $request);
         } elseif ($id) {
-            //new school approach
             $doc = DMSDocument::get()->byID(intval($id));
             $this->extend('updateDocumentFromID', $doc, $request);
         } else {
@@ -188,9 +170,10 @@ class DMSDocumentController extends Controller
     protected function sendFile($path, $mime, $name, $disposition)
     {
         header('Content-Type: ' . $mime);
-        header('Content-Length: ' . filesize($path), null);
+        header('Content-Length: ' . filesize($path));
+
         if (!empty($mime) && $mime != "text/html") {
-            header('Content-Disposition: '.$disposition.'; filename="'.addslashes($name).'"');
+            header('Content-Disposition: ' . $disposition . '; filename="' . addslashes($name) . '"');
         }
         header('Content-transfer-encoding: 8bit');
         header('Expires: 0');

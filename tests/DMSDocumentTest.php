@@ -36,7 +36,7 @@ class DMSDocumentTest extends SapphireTest
         $document = $this->objFromFixture(DMSDocument::class, 'document_with_relations');
         $this->assertGreaterThan(0, $document->RelatedDocuments()->count());
         $this->assertEquals(
-            array('test-file-file-doesnt-exist-1', 'test-file-file-doesnt-exist-2'),
+            ['test-file-file-doesnt-exist-1', 'test-file-file-doesnt-exist-2'],
             $document->getRelatedDocuments()->column('Filename')
         );
     }
@@ -105,12 +105,12 @@ class DMSDocumentTest extends SapphireTest
 
         $jsonResult = $autocompleter->doSearch(
             $gridField,
-            new HTTPRequest('GET', '/', array('gridfield_relationsearch' => 'test'))
+            new HTTPRequest('GET', '/', ['gridfield_relationsearch' => 'test'])
         );
 
         $this->assertNotContains('test-file-file-doesnt-exist-1', $jsonResult);
         $this->assertContains('test-file-file-doesnt-exist-2', $jsonResult);
-        $this->assertEquals(array('Title:PartialMatch', 'Filename:PartialMatch'), $autocompleter->getSearchFields());
+        $this->assertEquals(['Title:PartialMatch', 'Filename:PartialMatch'], $autocompleter->getSearchFields());
     }
 
     /**
@@ -147,7 +147,7 @@ class DMSDocumentTest extends SapphireTest
         $this->assertContains('permission', $result);
         $this->assertContains('Example', $result);
 
-        $actions = array('example', 'embargo','find-usage');
+        $actions = ['example', 'embargo','find-usage'];
         foreach ($actions as $action) {
             // Test remove with string
             $document->removeActionPanelTask($action);
@@ -305,7 +305,7 @@ class DMSDocumentTest extends SapphireTest
         $document = $this->objFromFixture(DMSDocument::class, 'd1');
         $result = $document->getRelatedPages();
         $this->assertCount(3, $result, 'Document 1 is related to 3 Pages');
-        $this->assertSame(array('s1', 's2', 's3'), $result->column('URLSegment'));
+        $this->assertSame(['s1', 's2', 's3'], $result->column('URLSegment'));
     }
 
     /**

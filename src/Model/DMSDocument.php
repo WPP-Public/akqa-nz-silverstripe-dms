@@ -2,35 +2,21 @@
 
 namespace Sunnysideup\DMS\Model;
 
-use Exception;
 
 use Sunnysideup\DMS\Model\DMSDocumentSet;
 use SilverStripe\Assets\File;
-use SilverStripe\Assets\Folder;
 use SilverStripe\Assets\Image;
 use SilverStripe\Security\Member;
-use Sunnysideup\DMS\Model\DMSDocument;
-use SilverStripe\Security\Group;
-use SilverStripe\Security\Permission;
 use SilverStripe\ORM\DB;
-use SilverStripe\ORM\DataExtension;
 use SilverStripe\View\Parsers\URLSegmentFilter;
 use SilverStripe\Control\Director;
 use SilverStripe\Control\Controller;
 use SilverStripe\Versioned\Versioned;
-use SilverStripe\ORM\FieldType\DBDatetime;
-use SilverStripe\ORM\FieldType\DBField;
-use Sunnysideup\DMS\DMS;
-use SilverStripe\View\Requirements;
 use SilverStripe\Forms\FieldList;
-use Sunnysideup\DMS\Tools\ShortCodeRelationFinder;
 use SilverStripe\Forms\ListboxField;
 use SilverStripe\Forms\TextField;
 use SilverStripe\Forms\TextareaField;
 use SilverStripe\AssetAdmin\Forms\UploadField;
-use SilverStripe\Core\Config\Config;
-use SilverStripe\Forms\HeaderField;
-use SilverStripe\Forms\OptionsetField;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\GridField\GridFieldConfig;
 use SilverStripe\Forms\GridField\GridFieldToolbarHeader;
@@ -40,30 +26,21 @@ use SilverStripe\Forms\GridField\GridFieldPaginator;
 use SilverStripe\Forms\GridField\GridFieldDetailForm;
 use SilverStripe\CMS\Controllers\CMSPageEditController;
 use SilverStripe\Forms\GridField\GridField;
-use SilverStripe\ORM\FieldType\DBDate;
-use SilverStripe\Forms\DatetimeField;
-use SilverStripe\Forms\FieldGroup;
 use SilverStripe\Forms\LiteralField;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Forms\CompositeField;
 use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\Forms\DateField_Disabled;
 use SilverStripe\ORM\ArrayList;
-use SilverStripe\Forms\GridField\GridFieldConfig_RecordViewer;
 use SilverStripe\Forms\GridField\GridFieldConfig_RelationEditor;
-use SilverStripe\Forms\GridField\GridFieldEditButton;
-use Sunnysideup\DMS\Cms\DMSGridFieldEditButton;
-use SilverStripe\Forms\GridField\GridFieldDeleteAction;
 use SilverStripe\Forms\GridField\GridFieldAddNewButton;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use SilverStripe\Forms\TabSet;
 use SilverStripe\Forms\Tab;
-use SilverStripe\Core\Convert;
 use SilverStripe\SiteConfig\SiteConfig;
-use SilverStripe\ORM\DataObject;
 use Sunnysideup\DMS\Interfaces\DMSDocumentInterface;
-use Sunnysideup\DMS\Admin\DMSDocumentAdmin;
-use SilverStripe\Core\Manifest\ModuleLoader;
+use Sunnysideup\DMS\Admin\DMSDocumentAdmin;;
+
 use SilverStripe\Core\Injector\Injector;
 
 /**
@@ -164,7 +141,7 @@ class DMSDocument extends File implements DMSDocumentInterface
      */
     public static function get_file_type($ext)
     {
-        $types = array(
+        $types = [
             'gif' => 'GIF image - good for diagrams',
             'jpg' => 'JPEG image - good for photos',
             'jpeg' => 'JPEG image - good for photos',
@@ -186,7 +163,7 @@ class DMSDocument extends File implements DMSDocumentInterface
             'css' => 'CSS file',
             'html' => 'HTML file',
             'htm' => 'HTML file'
-        );
+        ];
 
         return isset($types[$ext]) ? $types[$ext] : $ext;
     }
@@ -226,9 +203,9 @@ class DMSDocument extends File implements DMSDocumentInterface
         }
         if (!$siteConfig->DMSFolderID) {
             $fieldsForMain[] = (LiteralField::create(
-                    'DMSFolderMessage',
-                    '<h2>You need to <a href="/admin/settings/" target="_blank">set</a> the folder for the DMS documents before you can create a DMS document.'
-                ));
+                'DMSFolderMessage',
+                '<h2>You need to <a href="/admin/settings/" target="_blank">set</a> the folder for the DMS documents before you can create a DMS document.'
+            ));
         } else {
             if (!$this->ID) {
                 $uploadField = new UploadField('TempFile', 'File');
@@ -258,7 +235,7 @@ class DMSDocument extends File implements DMSDocumentInterface
                 }
 
                 $coverImageField = UploadField::create('CoverImage', _t('DMSDocument.COVERIMAGE', 'Cover Image'));
-                $coverImageField->getValidator()->setAllowedExtensions(array('jpg', 'jpeg', 'png', 'gif'));
+                $coverImageField->getValidator()->setAllowedExtensions(['jpg', 'jpeg', 'png', 'gif']);
                 $coverImageField->setAllowedMaxFileNumber(1);
                 $fieldsForDetails[] = $coverImageField;
 
@@ -272,17 +249,17 @@ class DMSDocument extends File implements DMSDocumentInterface
                 );
 
                 $gridFieldConfig->getComponentByType(GridFieldDataColumns::class)
-                    ->setDisplayFields(array(
+                    ->setDisplayFields([
                         'Title' => 'Title',
                         'ClassName' => 'Page Type',
                         'ID' => 'Page ID'
-                    ))
-                    ->setFieldFormatting(array(
+                    ])
+                    ->setFieldFormatting([
                         'Title' => sprintf(
                             '<a class=\"cms-panel-link\" href=\"%s/$ID\">$Title</a>',
                             singleton(CMSPageEditController::class)->Link('show')
                         )
-                    ));
+                    ]);
 
                 $pagesGrid = GridField::create(
                     'Pages',
@@ -360,12 +337,12 @@ class DMSDocument extends File implements DMSDocumentInterface
     public function getPermissionsActionPanel()
     {
         $fields = FieldList::create();
-        $showFields = array(
+        $showFields = [
             'CanViewType'  => '',
             'ViewerGroups' => 'hide',
             'CanEditType'  => '',
             'EditorGroups' => 'hide',
-        );
+        ];
         /** @var SiteTree $siteTree */
         $siteTree = singleton(SiteTree::class);
         $settingsFields = $siteTree->getSettingsFields();
@@ -634,7 +611,7 @@ class DMSDocument extends File implements DMSDocumentInterface
         $addExisting->setSearchList($this->getRelatedDocumentsForAutocompleter());
 
         // Restrict search fields to specific fields only
-        $addExisting->setSearchFields(array('Title:PartialMatch', 'Filename:PartialMatch'));
+        $addExisting->setSearchFields(['Title:PartialMatch', 'Filename:PartialMatch']);
         $addExisting->setResultsFormat('$Filename');
 
         $this->extend('updateRelatedDocumentsGridField', $gridField);
@@ -782,7 +759,7 @@ class DMSDocument extends File implements DMSDocumentInterface
      */
     public function canEdit($member = null)
     {
-        if (Controller::curr() instanceof DMSDocumentAdmin || Controller::curr() instanceof CMSPageEditController){
+        if (Controller::curr() instanceof DMSDocumentAdmin || Controller::curr() instanceof CMSPageEditController) {
             return parent::canEdit($member);
         } else {
             return false;

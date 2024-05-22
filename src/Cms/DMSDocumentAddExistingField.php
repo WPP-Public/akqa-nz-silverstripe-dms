@@ -6,7 +6,6 @@ use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Forms\TreeDropdownField;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\View\Requirements;
-use Sunnysideup\DMS\Cms\DMSDocumentAddExistingField;
 use SilverStripe\Forms\CompositeField;
 
 class DMSDocumentAddExistingField extends CompositeField
@@ -48,26 +47,28 @@ class DMSDocumentAddExistingField extends CompositeField
         if (!$this->record && $this->form) {
             if ($this->form->getRecord() && is_a($this->form->getRecord(), DataObject::class)) {
                 $this->record = $this->form->getRecord();
-            } elseif ($this->form->Controller() && $this->form->Controller()->hasMethod('data')
-                    && $this->form->Controller()->data() && is_a($this->form->Controller()->data(), DataObject::class)) {
+            } elseif (
+                $this->form->Controller() && $this->form->Controller()->hasMethod('data')
+                && $this->form->Controller()->data() && is_a($this->form->Controller()->data(), DataObject::class)
+            ) {
                 $this->record = $this->form->Controller()->data();
             }
         }
         return $this->record;
     }
 
-    public function FieldHolder($properties = array())
+    public function FieldHolder($properties = [])
     {
         return $this->Field($properties);
     }
 
-    public function Field($properties = array())
+    public function Field($properties = [])
     {
-        Requirements::javascript(DMS_DIR . '/javascript/DMSDocumentAddExistingField.js');
-        Requirements::javascript(DMS_DIR . '/javascript/DocumentHTMLEditorFieldToolbar.js');
-        Requirements::css(DMS_DIR . '/dist/css/cmsbundle.css');
+        Requirements::javascript('heyday/silverstripe-dms:javascript/DMSDocumentAddExistingField.js');
+        Requirements::javascript('heyday/silverstripe-dms:javascript/DocumentHTMLEditorFieldToolbar.js');
+        Requirements::css('heyday/silverstripe-dms:dist/css/cmsbundle.css');
 
-        return $this->renderWith(DMSDocumentAddExistingField::class);
+        return $this->renderWith(self::class);
     }
 
     /**

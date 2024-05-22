@@ -3,13 +3,7 @@
 namespace Sunnysideup\DMS\Cms;
 
 use Exception;
-
-
-
 use SilverStripe\Core\Injector\Injector;
-
-
-
 use Sunnysideup\DMS\DMS;
 use Sunnysideup\DMS\Model\DMSDocument;
 use Sunnysideup\DMS\Model\DMSDocumentSet;
@@ -129,7 +123,7 @@ class DMSUploadField extends UploadField
                     $record->write();
                 }
                 $tooManyFiles = $record->{$name}()->count() >= $this->getConfig('allowedMaxFileNumber');
-            // has_one only allows one file at any given time.
+                // has_one only allows one file at any given time.
             } elseif ($record->hasOne($name)) {
                 $tooManyFiles = $record->{$name}() && $record->{$name}()->exists();
             }

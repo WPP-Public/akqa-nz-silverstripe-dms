@@ -51,7 +51,7 @@ class DMSShortcodeHandlerTest extends SapphireTest
     public function testShortcodeWithContentReturnsParsedContentInLink()
     {
         $document = $this->objFromFixture(DMSDocument::class, 'd1');
-        $arguments = array('id' => $document->ID);
+        $arguments = ['id' => $document->ID];
         $result = DMSShortcodeHandler::handle($arguments, 'Some content', ShortcodeParser::get('default'), '');
 
         $this->assertSame(
@@ -67,8 +67,8 @@ class DMSShortcodeHandlerTest extends SapphireTest
      */
     public function testReturnErrorPageWhenIdIsEmpty()
     {
-        ErrorPage::create(array('URLSegment' => 'testing', 'ErrorCode' => '404'))->write();
-        $result = DMSShortcodeHandler::handle(array(), '', ShortcodeParser::get('default'), '');
+        ErrorPage::create(['URLSegment' => 'testing', 'ErrorCode' => '404'])->write();
+        $result = DMSShortcodeHandler::handle([], '', ShortcodeParser::get('default'), '');
         $this->assertContains('testing', $result);
     }
 
@@ -78,6 +78,6 @@ class DMSShortcodeHandlerTest extends SapphireTest
      */
     public function testReturnEmptyStringWhenNoErrorPageExistsAndIdIsEmpty()
     {
-        $this->assertSame('', DMSShortcodeHandler::handle(array(), '', ShortcodeParser::get('default'), ''));
+        $this->assertSame('', DMSShortcodeHandler::handle([], '', ShortcodeParser::get('default'), ''));
     }
 }

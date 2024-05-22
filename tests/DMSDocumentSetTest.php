@@ -70,7 +70,7 @@ class DMSDocumentSetTest extends SapphireTest
 
         $this->assertCount(0, $s4->DocumentSets(), 'Page 4 has no document sets associated');
         $this->assertCount(2, $s1->DocumentSets(), 'Page 1 has 2 document sets');
-        $this->assertEquals(array($ds1->ID, $ds2->ID), $s1->DocumentSets()->column('ID'));
+        $this->assertEquals([$ds1->ID, $ds2->ID], $s1->DocumentSets()->column('ID'));
     }
 
     /**
@@ -109,7 +109,7 @@ class DMSDocumentSetTest extends SapphireTest
         $document = $this->objFromFixture(DMSDocumentSet::class, 'ds1');
         $this->assertInternalType('array', $document->getDocumentDisplayFields());
 
-        Config::modify()->update(DMSDocument::class, 'display_fields', array('apple' => 'Apple', 'orange' => 'Orange'));
+        Config::modify()->update(DMSDocument::class, 'display_fields', ['apple' => 'Apple', 'orange' => 'Orange']);
         $displayFields = $document->getDocumentDisplayFields();
         $this->assertContains('Apple', $displayFields);
         $this->assertContains('Orange', $displayFields);
@@ -191,7 +191,7 @@ class DMSDocumentSetTest extends SapphireTest
     {
         Config::modify()->update(DMS::class, 'shortcode_handler_key', 'unit-test');
 
-        $set = DMSDocumentSet::create(array('Title' => 'TestSet'));
+        $set = DMSDocumentSet::create(['Title' => 'TestSet']);
         $set->write();
 
         $fields = $set->getCMSFields();
@@ -242,7 +242,7 @@ class DMSDocumentSetTest extends SapphireTest
      */
     public function testExceptionOnNoTitleGiven()
     {
-        DMSDocumentSet::create(array('Title' => ''))->write();
+        DMSDocumentSet::create(['Title' => ''])->write();
     }
 
     /**

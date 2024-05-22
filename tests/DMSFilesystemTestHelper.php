@@ -10,7 +10,7 @@ class DMSFilesystemTestHelper
      *
      * @var array
      */
-    protected static $dmsFiles = array('.htaccess', 'web.config');
+    protected static $dmsFiles = ['.htaccess', 'web.config'];
 
     /**
      * Deletes a directory and all files within it, or a file. Will automatically prepend the base path.

@@ -95,24 +95,15 @@ class DMSDocumentAddController extends LeftAndMain
     public function getEditForm($id = null, $fields = null)
     {
 
-/**
-  * ### @@@@ START REPLACEMENT @@@@ ###
-  * WHY: upgrade to SS4
-  * OLD: FRAMEWORK_DIR (ignore case)
-  * NEW: SilverStripe\Core\Manifest\ModuleLoader::getModule('silverstripe/framework')->getResource('UPGRADE-FIX-REQUIRED.php')->getRelativePath() (COMPLEX)
-  * EXP: Please review update and fix as required
-  * ### @@@@ STOP REPLACEMENT @@@@ ###
-  */
-        Requirements::javascript(SilverStripe\Core\Manifest\ModuleLoader::getModule('silverstripe/framework')->getResource('UPGRADE-FIX-REQUIRED.php')->getRelativePath() . '/javascript/AssetUploadField.js');
-
         /**
-          * ### @@@@ START REPLACEMENT @@@@ ###
-          * WHY: upgrade to SS4
-          * OLD: FRAMEWORK_DIR (ignore case)
-          * NEW: SilverStripe\Core\Manifest\ModuleLoader::getModule('silverstripe/framework')->getResource('UPGRADE-FIX-REQUIRED.php')->getRelativePath() (COMPLEX)
-          * EXP: Please review update and fix as required
-          * ### @@@@ STOP REPLACEMENT @@@@ ###
-          */
+         * ### @@@@ START REPLACEMENT @@@@ ###
+         * WHY: upgrade to SS4
+         * OLD: FRAMEWORK_DIR (ignore case)
+         * NEW: SilverStripe\Core\Manifest\ModuleLoader::getModule('silverstripe/framework')->getResource('UPGRADE-FIX-REQUIRED.php')->getRelativePath() (COMPLEX)
+         * EXP: Please review update and fix as required
+         * ### @@@@ STOP REPLACEMENT @@@@ ###
+         */
+        Requirements::javascript(SilverStripe\Core\Manifest\ModuleLoader::getModule('silverstripe/framework')->getResource('UPGRADE-FIX-REQUIRED.php')->getRelativePath() . '/javascript/AssetUploadField.js');
         Requirements::css(SilverStripe\Core\Manifest\ModuleLoader::getModule('silverstripe/framework')->getResource('UPGRADE-FIX-REQUIRED.php')->getRelativePath() . '/css/AssetUploadField.css');
         Requirements::css(DMS_DIR . '/dist/css/cmsbundle.css');
 
@@ -264,7 +255,7 @@ class DMSDocumentAddController extends LeftAndMain
         $data = DMSDocument::get()
             ->where(
                 '("ID" LIKE \'%' . $termSql . '%\' OR "Filename" LIKE \'%' . $termSql . '%\''
-                . ' OR "Title" LIKE \'%' . $termSql . '%\')'
+                    . ' OR "Title" LIKE \'%' . $termSql . '%\')'
             )
             ->sort('ID ASC')
             ->limit(20);
@@ -334,7 +325,7 @@ class DMSDocumentAddController extends LeftAndMain
                 $list .= sprintf(
                     '<li><a class="add-document" data-document-id="%s">%s</a></li>',
                     $document->ID,
-                    $document->ID . ' - '. Convert::raw2xml($document->Title)
+                    $document->ID . ' - ' . Convert::raw2xml($document->Title)
                 );
             }
 
@@ -377,7 +368,8 @@ class DMSDocumentAddController extends LeftAndMain
             $member = Member::currentUser();
         }
 
-        if ($member &&
+        if (
+            $member &&
             Permission::checkMember(
                 $member,
                 array(

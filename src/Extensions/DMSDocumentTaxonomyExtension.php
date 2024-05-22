@@ -11,9 +11,9 @@ use SilverStripe\ORM\DataExtension;
 class DMSDocumentTaxonomyExtension extends DataExtension
 {
 
-    private static $many_many = array(
+    private static $many_many = [
         'Tags' => TaxonomyTerm::class
-    );
+    ];
 
     private static $many_many_extraFields = [
         'Tags' => [
@@ -36,7 +36,7 @@ class DMSDocumentTaxonomyExtension extends DataExtension
 
         $map = [];
         foreach ($tags as $tag) {
-            $nameParts = array($tag->Name);
+            $nameParts = [$tag->Name];
             $currentTag = $tag;
 
             while ($currentTag->Parent() && $currentTag->Parent()->exists()) {

@@ -20,10 +20,10 @@ class MigrateToDocumentSetsTaskTest extends SapphireTest
      */
     public function testCanOutputToCliOrBrowser($isCli, $expected)
     {
-        $lines = array('Test', 'Test line 2');
+        $lines = ['Test', 'Test line 2'];
 
         $mock = $this->getMockBuilder(MigrateToDocumentSetsTask::class)
-            ->setMethods(array('isCli'))
+            ->setMethods(['isCli'])
             ->getMock();
 
         $mock->expects($this->exactly(2))
@@ -43,10 +43,10 @@ class MigrateToDocumentSetsTaskTest extends SapphireTest
      */
     public function outputProvider()
     {
-        return array(
-            array(true, 'Test' . PHP_EOL . 'Test line 2' . PHP_EOL),
-            array(false, 'Test<br />Test line 2<br />')
-        );
+        return [
+            [true, 'Test' . PHP_EOL . 'Test line 2' . PHP_EOL],
+            [false, 'Test<br />Test line 2<br />']
+        ];
     }
 
     /**
@@ -54,7 +54,7 @@ class MigrateToDocumentSetsTaskTest extends SapphireTest
      */
     public function testShowErrorOnInvalidAction()
     {
-        $result = $this->runTask(array('action' => 'coffeetime'));
+        $result = $this->runTask(['action' => 'coffeetime']);
         $this->assertContains('Error! Specified action is not valid.', $result);
     }
 
@@ -65,7 +65,7 @@ class MigrateToDocumentSetsTaskTest extends SapphireTest
     {
         $this->fixtureOldRelations();
 
-        $result = $this->runTask(array('action' => 'create-default-document-set'));
+        $result = $this->runTask(['action' => 'create-default-document-set']);
         $this->assertContains('Finished', $result);
         // There are four pages in the fixture, but one of them already has a document set, so should be unchanged
         $this->assertContains('Default document set added: 3', $result);
@@ -77,7 +77,7 @@ class MigrateToDocumentSetsTaskTest extends SapphireTest
         $this->assertCount(1, $this->objFromFixture(SiteTree::class, 'two')->DocumentSets());
 
         // With dryrun enabled and being run the second time, nothing should be done
-        $result = $this->runTask(array('action' => 'create-default-document-set', 'dryrun' => '1'));
+        $result = $this->runTask(['action' => 'create-default-document-set', 'dryrun' => '1']);
         $this->assertContains('Skipped: already has a set: 4', $result);
         $this->assertContains('NOTE: Dryrun mode enabled', $result);
     }
@@ -90,15 +90,15 @@ class MigrateToDocumentSetsTaskTest extends SapphireTest
         $this->fixtureOldRelations();
 
         // Ensure default sets are created
-        $this->runTask(array('action' => 'create-default-document-set'));
+        $this->runTask(['action' => 'create-default-document-set']);
 
         // Dryrun check
-        $result = $this->runTask(array('action' => 'reassign-documents', 'dryrun' => '1'));
+        $result = $this->runTask(['action' => 'reassign-documents', 'dryrun' => '1']);
         $this->assertContains('NOTE: Dryrun mode enabled', $result);
         $this->assertContains('Reassigned to document set: 3', $result);
 
         // Actual run
-        $result = $this->runTask(array('action' => 'reassign-documents'));
+        $result = $this->runTask(['action' => 'reassign-documents']);
         $this->assertNotContains('NOTE: Dryrun mode enabled', $result);
         $this->assertContains('Reassigned to document set: 3', $result);
 
@@ -130,19 +130,19 @@ class MigrateToDocumentSetsTaskTest extends SapphireTest
     protected function fixtureOldRelations()
     {
         if (!DB::get_schema()->hasTable('DMSDocument_Pages')) {
-            DB::create_table('DMSDocument_Pages', array(
+            DB::create_table('DMSDocument_Pages', [
                 'DMSDocumentID' => 'int(11) null',
                 'SiteTreeID' => 'int(11) null'
-            ));
+            ]);
         }
 
         $documentIds = $this->getFixtureFactory()->getIds(DMSDocument::class);
         $pageIds = $this->getFixtureFactory()->getIds(SiteTree::class);
-        foreach (array('one', 'two', 'three') as $fixtureName) {
+        foreach (['one', 'two', 'three'] as $fixtureName) {
             $this->getFixtureFactory()->createRaw(
                 'DMSDocument_Pages',
                 'rln_' . $fixtureName,
-                array('DMSDocumentID' => $documentIds[$fixtureName], 'SiteTreeID' => $pageIds[$fixtureName])
+                ['DMSDocumentID' => $documentIds[$fixtureName], 'SiteTreeID' => $pageIds[$fixtureName]]
             );
         }
     }

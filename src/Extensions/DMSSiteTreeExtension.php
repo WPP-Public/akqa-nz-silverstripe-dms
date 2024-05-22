@@ -4,25 +4,27 @@ namespace Sunnysideup\DMS\Extensions;
 
 use Sunnysideup\DMS\Model\DMSDocumentSet;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\Forms\GridField\GridFieldConfig_RelationEditor;
 use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
-use SilverStripe\Dev\Deprecation;
 use SilverStripe\ORM\ArrayList;
-use SilverStripe\Versioned\Versioned;
 use SilverStripe\ORM\DataExtension;
-
-/**
- * @package dms
- */
+use SilverStripe\Security\Security;
 
 class DMSSiteTreeExtension extends DataExtension
 {
-    private static $has_many = array(
+    private static $has_many = [
         'DocumentSets' => DMSDocumentSet::class
-    );
+    ];
+
+    private static $cascade_deletes = [
+        'DocumentSets'
+    ];
+
+    private static $cascade_duplicates = [
+        'DocumentSets'
+    ];
 
     public function updateCMSFields(FieldList $fields)
     {
@@ -31,12 +33,10 @@ class DMSSiteTreeExtension extends DataExtension
             return;
         }
 
-        // Hides the DocumentSets tab if the user has no permisions
         if (!Permission::checkMember(
-            Member::currentUser(),
-            array('ADMIN', 'CMS_ACCESS_DMSDocumentAdmin')
-        )
-        ) {
+            Security::getCurrentUser(),
+            ['ADMIN', 'CMS_ACCESS_DMSDocumentAdmin']
+        )) {
             return;
         }
 
@@ -50,7 +50,7 @@ class DMSSiteTreeExtension extends DataExtension
 
         // Only show document sets in the autocompleter that have not been assigned to a page already
         $config->getComponentByType(GridFieldAddExistingAutocompleter::class)->setSearchList(
-            DMSDocumentSet::get()->filter(array('PageID' => 0))
+            DMSDocumentSet::get()->filter(['PageID' => 0])
         );
 
         $fields->addFieldToTab(
@@ -63,7 +63,7 @@ class DMSSiteTreeExtension extends DataExtension
             ->setTitle(_t(
                 __CLASS__ . '.DocumentSetsTabTitle',
                 'Document Sets ({count})',
-                array('count' => $this->owner->DocumentSets()->count())
+                ['count' => $this->owner->DocumentSets()->count()]
             ));
     }
 
@@ -87,16 +87,14 @@ class DMSSiteTreeExtension extends DataExtension
 
     public function onBeforeDelete()
     {
-        //@todo: UPGRADE: should we really delete the documents, even from the sets?
-        // Only remove if record doesn't still exist on live stage.
         if ($this->owner->isOnDraft() || $this->owner->isPublished()) {
             //do nothing...
         } else {
             $dmsDocuments = $this->owner->getAllDocuments();
+
             foreach ($dmsDocuments as $document) {
                 // If the document is only associated with one page, i.e. only associated with this page
                 if ($document->getRelatedPages()->count() <= 1) {
-                    // Delete the document before deleting this page
                     $document->delete();
                 }
             }

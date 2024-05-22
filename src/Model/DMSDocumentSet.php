@@ -2,43 +2,12 @@
 
 namespace Sunnysideup\DMS\Model;
 
-use UndefinedOffset\SortableGridField\Forms\GridFieldSortableRows;
-use Symbiote\GridFieldExtension\GridFieldOrderableRows;
-use SilverStripe\Assets\File;
 use SilverStripe\CMS\Model\SiteTree;
 use Sunnysideup\DMS\Model\DMSDocument;
-use SilverStripe\Forms\FieldList;
-use SilverStripe\Forms\LiteralField;
-use SilverStripe\Forms\GridField\GridFieldConfig;
-use SilverStripe\Forms\GridField\GridFieldButtonRow;
-use SilverStripe\Forms\GridField\GridFieldToolbarHeader;
-use SilverStripe\Forms\GridField\GridFieldFilterHeader;
-use SilverStripe\Forms\GridField\GridFieldSortableHeader;
-use SilverStripe\Forms\GridField\GridFieldDataColumns;
-use Sunnysideup\DMS\Cms\DMSGridFieldEditButton;
-use SilverStripe\Forms\GridField\GridFieldDeleteAction;
-use SilverStripe\Forms\GridField\GridFieldDetailForm;
-use SilverStripe\Forms\GridField\GridFieldPaginator;
-use SilverStripe\Control\Controller;
-use SilverStripe\CMS\Controllers\CMSPageEditController;
-use Sunnysideup\DMS\Cms\DMSGridFieldDetailForm_ItemRequest;
-use SilverStripe\Forms\GridField\GridField;
-use Sunnysideup\DMS\Cms\DMSGridFieldAddNewButton;
-use SilverStripe\Forms\GridField\GridFieldExportButton;
-use Sunnysideup\DMS\DMS;
-use SilverStripe\Forms\HiddenField;
-use SilverStripe\View\Requirements;
 use SilverStripe\Security\Member;
-use SilverStripe\Forms\ListboxField;
-use Sunnysideup\DMS\Forms\DMSJsonField;
-use SilverStripe\Forms\DropdownField;
-use SilverStripe\Forms\FieldGroup;
-use SilverStripe\Core\Convert;
 use SilverStripe\ORM\DataList;
-use SilverStripe\ORM\FieldType\DBDatetime;
 use SilverStripe\Security\Permission;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\Core\Manifest\ModuleLoader;
 
 /**
  * A document set is attached to Pages, and contains many DMSDocuments
@@ -57,34 +26,34 @@ class DMSDocumentSet extends DataObject
 
     private static $plural_name = 'DMS Document Sets';
 
-    private static $db = array(
+    private static $db = [
         'Title' => 'Varchar(255)',
         'KeyValuePairs' => 'Text',
         'SortBy' => "Enum('LastEdited,Created,Title')')",
         'SortByDirection' => "Enum('DESC,ASC')')",
-    );
+    ];
 
-    private static $has_one = array(
+    private static $has_one = [
         'Page' => SiteTree::class,
-    );
+    ];
 
-    private static $many_many = array(
+    private static $many_many = [
         'Documents' => DMSDocument::class,
-    );
+    ];
 
-    private static $many_many_extraFields = array(
-        'Documents' => array(
+    private static $many_many_extraFields = [
+        'Documents' => [
             // Flag indicating if a document was added directly to a set - in which case it is set - or added
             // via the query-builder.
             'ManuallyAdded' => 'Boolean(1)',
             'DocumentSort' => 'Int'
-        ),
-    );
+        ],
+    ];
 
-    private static $summary_fields = array(
+    private static $summary_fields = [
         'Title' => 'Title',
         'Documents.Count' => 'No. Documents'
-    );
+    ];
 
     /**
      * Retrieve a list of the documents in this set. An extension hook is provided before the result is returned.
@@ -118,7 +87,7 @@ class DMSDocumentSet extends DataObject
     {
         return array_merge(
             (array) DMSDocument::create()->config()->get('display_fields'),
-            array('ManuallyAdded' => _t('DMSDocumentSet.ADDEDMETHOD', 'Added'))
+            ['ManuallyAdded' => _t('DMSDocumentSet.ADDEDMETHOD', 'Added')]
         );
     }
 
@@ -185,7 +154,7 @@ class DMSDocumentSet extends DataObject
             $member &&
             Permission::checkMember(
                 $member,
-                array('ADMIN', 'SITETREE_EDIT_ALL', 'CMS_ACCESS_DMSDocumentAdmin')
+                ['ADMIN', 'SITETREE_EDIT_ALL', 'CMS_ACCESS_DMSDocumentAdmin']
             )
         );
 

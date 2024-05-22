@@ -18,7 +18,7 @@ class DMSDocumentAddControllerTest extends FunctionalTest
      */
     protected $controller;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->logInWithPermission();
@@ -36,7 +36,7 @@ class DMSDocumentAddControllerTest extends FunctionalTest
 
         $this->assertInstanceOf(SiteTree::class, $this->controller->currentPage());
         $this->assertEmpty($this->controller->currentPage()->ID);
-        $this->controller->setRequest(new HTTPRequest('GET', '/', array('page_id' => $page->ID)));
+        $this->controller->setRequest(new HTTPRequest('GET', '/', ['page_id' => $page->ID]));
         $this->assertEquals($page->ID, $this->controller->currentPage()->ID, 'Specified page is loaded and returned');
     }
 
@@ -50,7 +50,7 @@ class DMSDocumentAddControllerTest extends FunctionalTest
 
         $this->assertInstanceOf(DMSDocumentSet::class, $this->controller->getCurrentDocumentSet());
         $this->assertEmpty($this->controller->getCurrentDocumentSet()->ID, 'Singleton does not have an ID');
-        $this->controller->setRequest(new HTTPRequest('GET', '/', array('dsid' => $set->ID)));
+        $this->controller->setRequest(new HTTPRequest('GET', '/', ['dsid' => $set->ID]));
         $this->assertEquals($set->ID, $this->controller->getCurrentDocumentSet()->ID, 'Specified document set is returned');
     }
 
@@ -60,11 +60,11 @@ class DMSDocumentAddControllerTest extends FunctionalTest
     public function testGetAllowedExtensions()
     {
         Config::inst()->remove(File::class, 'allowed_extensions');
-        Config::modify()->update(File::class, 'allowed_extensions', array('jpg', 'gif'));
-        $this->assertSame(array('jpg', 'gif'), $this->controller->getAllowedExtensions());
+        Config::modify()->update(File::class, 'allowed_extensions', ['jpg', 'gif']);
+        $this->assertSame(['jpg', 'gif'], $this->controller->getAllowedExtensions());
 
-        Config::modify()->update(DMSDocumentAddController::class, 'allowed_extensions', array('php', 'php5'));
-        $this->assertSame(array('jpg', 'gif', 'php', 'php5'), $this->controller->getAllowedExtensions());
+        Config::modify()->update(DMSDocumentAddController::class, 'allowed_extensions', ['php', 'php5']);
+        $this->assertSame(['jpg', 'gif', 'php', 'php5'], $this->controller->getAllowedExtensions());
     }
 
     /**
@@ -77,13 +77,13 @@ class DMSDocumentAddControllerTest extends FunctionalTest
         $this->assertContains('admin/documents', $this->controller->Backlink());
 
         // No page ID, has document set ID
-        $request = new HTTPRequest('GET', '/', array('dsid' => 123));
+        $request = new HTTPRequest('GET', '/', ['dsid' => 123]);
         $this->controller->setRequest($request);
         $this->assertContains('EditForm', $this->controller->Backlink());
         $this->assertContains('123', $this->controller->Backlink());
 
         // Has page ID and document set ID
-        $request = new HTTPRequest('GET', '/', array('dsid' => 123, 'page_id' => 234));
+        $request = new HTTPRequest('GET', '/', ['dsid' => 123, 'page_id' => 234]);
         $this->controller->setRequest($request);
         $this->assertContains('admin/pages', $this->controller->Backlink());
         $this->assertContains('123', $this->controller->Backlink());

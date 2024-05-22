@@ -37,7 +37,7 @@ class DMSTest extends FunctionalTest
      *
      * {@inheritDoc}
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         Config::modify()->update(DMS::class, 'folder_name', $this->testDmsPath);
@@ -50,7 +50,7 @@ class DMSTest extends FunctionalTest
      *
      * {@inheritDoc}
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         parent::tearDown();
         DMSFilesystemTestHelper::delete($this->testDmsPath);
@@ -65,7 +65,7 @@ class DMSTest extends FunctionalTest
         $this->assertTrue(
             file_exists(
                 DMS::inst()->getStoragePath() . DIRECTORY_SEPARATOR . $document->Folder
-                . DIRECTORY_SEPARATOR . $document->Filename
+                    . DIRECTORY_SEPARATOR . $document->Filename
             ),
             "Document file copied into DMS folder"
         );
@@ -81,14 +81,14 @@ class DMSTest extends FunctionalTest
             $document = $this->dms->storeDocument($file);
             $this->assertNotNull($document, "Document object created on run number: $i");
 
-/**
-  * ### @@@@ START REPLACEMENT @@@@ ###
-  * WHY: upgrade to SS4
-  * OLD: ->getFullPath() (case sensitive)
-  * NEW: ->getFilename() (COMPLEX)
-  * EXP: You may need to add ASSETS_PATH."/" in front of this ...
-  * ### @@@@ STOP REPLACEMENT @@@@ ###
-  */
+            /**
+             * ### @@@@ START REPLACEMENT @@@@ ###
+             * WHY: upgrade to SS4
+             * OLD: ->getFullPath() (case sensitive)
+             * NEW: ->getFilename() (COMPLEX)
+             * EXP: You may need to add ASSETS_PATH."/" in front of this ...
+             * ### @@@@ STOP REPLACEMENT @@@@ ###
+             */
             $this->assertTrue(file_exists($document->getFilename()));
             $documents[] = $document;
         }
@@ -100,13 +100,13 @@ class DMSTest extends FunctionalTest
             $this->assertTrue(
 
                 /**
-                * ### @@@@ START REPLACEMENT @@@@ ###
-                * WHY: upgrade to SS4
-                * OLD: ->getFullPath() (case sensitive)
-                * NEW: ->getFilename() (COMPLEX)
-                * EXP: You may need to add ASSETS_PATH."/" in front of this ...
-                * ### @@@@ STOP REPLACEMENT @@@@ ###
-                */
+                 * ### @@@@ START REPLACEMENT @@@@ ###
+                 * WHY: upgrade to SS4
+                 * OLD: ->getFullPath() (case sensitive)
+                 * NEW: ->getFilename() (COMPLEX)
+                 * EXP: You may need to add ASSETS_PATH."/" in front of this ...
+                 * ### @@@@ STOP REPLACEMENT @@@@ ###
+                 */
                 strpos($documents[$i]->getFilename(), DIRECTORY_SEPARATOR . $folderName . DIRECTORY_SEPARATOR) !== false,
                 "Correct folder name for the documents. Document path contains reference to folder name '$folderName'"
             );
@@ -137,7 +137,7 @@ class DMSTest extends FunctionalTest
         $this->assertTrue(
             file_exists(
                 DMS::inst()->getStoragePath() . DIRECTORY_SEPARATOR . $document->Folder
-                . DIRECTORY_SEPARATOR . $document->Filename
+                    . DIRECTORY_SEPARATOR . $document->Filename
             ),
             "Document file copied into DMS folder"
         );

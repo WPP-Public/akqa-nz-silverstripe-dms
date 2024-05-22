@@ -11,7 +11,7 @@ class DMSUploadFieldTest extends SapphireTest
      */
     protected $field;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

@@ -7,7 +7,7 @@ class DMSDocumentTaxonomyExtensionTest extends SapphireTest
 {
     protected static $fixture_file = 'DMSDocumentTaxonomyExtensionTest.yml';
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

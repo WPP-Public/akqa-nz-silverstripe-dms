@@ -12,12 +12,11 @@
 namespace Sunnysideup\DMS\Tasks;
 
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\SiteConfig\SiteConfig;
-use SilverStripe\Versioned\Versioned;
-
-
-use Sunnysideup\DMS\Model\DMSDocument;
 use Sunnysideup\MigrateData\Tasks\MigrateDataTask;
+
+if (!class_exists(MigrateDataTask::class)) {
+    return;
+}
 
 class MakeDMSTablesObsolete extends MigrateDataTask
 {
@@ -36,16 +35,17 @@ class MakeDMSTablesObsolete extends MigrateDataTask
 
         $oldFolder = ASSETS_PATH . '/_dmsassets';
         $newFolder = ASSETS_PATH . '/dmsassets';
-        if (file_exists($oldFolder) && ! file_exists($newFolder)) {
+        if (file_exists($oldFolder) && !file_exists($newFolder)) {
             rename($oldFolder, $newFolder);
         } elseif (file_exists($oldFolder) && file_exists($newFolder)) {
-            user_error($oldFolder.' AND '.$newFolder.' exist! Please review ...', E_USER_NOTICE);
+            user_error($oldFolder . ' AND ' . $newFolder . ' exist! Please review ...', E_USER_NOTICE);
         }
 
         $obj = Injector::inst()->get('Sunnysideup\\MigrateData\\Tasks\\MigrateDataTask');
 
         if ($obj->tableExists('DMSDocument_versions')) {
-            if ($obj->fieldExists('DMSDocument_versions', 'Created') &&
+            if (
+                $obj->fieldExists('DMSDocument_versions', 'Created') &&
                 $obj->fieldExists('DMSDocument_versions', 'LastEdited')
             ) {
                 $obj->makeTableObsolete('DMSDocument_versions');
@@ -53,14 +53,12 @@ class MakeDMSTablesObsolete extends MigrateDataTask
         }
 
         if ($obj->tableExists('DMSDocument')) {
-            if ($obj->fieldExists('DMSDocument', 'Created') &&
+            if (
+                $obj->fieldExists('DMSDocument', 'Created') &&
                 $obj->fieldExists('DMSDocument', 'LastEdited')
             ) {
                 $obj->makeTableObsolete('DMSDocument');
             }
         }
-
-
     }
-
 }

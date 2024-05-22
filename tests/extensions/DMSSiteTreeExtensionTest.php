@@ -10,11 +10,11 @@ use SilverStripe\Dev\SapphireTest;
 
 class DMSSiteTreeExtensionTest extends SapphireTest
 {
-    protected static $fixture_file = 'dms/tests/dmstest.yml';
+    protected static $fixture_file = 'dmstest.yml';
 
-    protected static $required_extensions = array(
-        'SiteTree' => array(DMSSiteTreeExtension::class)
-    );
+    protected static $required_extensions = [
+        'SiteTree' => [DMSSiteTreeExtension::class]
+    ];
 
     /**
      * Ensure that setting the configuration property "documents_enabled" to false for a page type will prevent the
@@ -38,10 +38,10 @@ class DMSSiteTreeExtensionTest extends SapphireTest
      */
     public function documentSetEnabledConfigProvider()
     {
-        return array(
-            array(true, 'assertNotNull'),
-            array(false, 'assertNull')
-        );
+        return [
+            [true, 'assertNotNull'],
+            [false, 'assertNull']
+        ];
     }
 
     /**
@@ -80,7 +80,7 @@ class DMSSiteTreeExtensionTest extends SapphireTest
         $siteTree->publishRecursive();
 
         // Fixture defines this page as having two documents via one set
-        foreach (array('embargo-until-publish1', 'embargo-until-publish2') as $filename) {
+        foreach (['embargo-until-publish1', 'embargo-until-publish2'] as $filename) {
             $this->assertFalse(
                 (bool) $siteTree->getAllDocuments()
                     ->filter('Filename', 'embargo-until-publish1')
@@ -104,7 +104,7 @@ class DMSSiteTreeExtensionTest extends SapphireTest
         $autocompleter = $gridField->getConfig()->getComponentByType(GridFieldAddExistingAutocompleter::class);
         $jsonResult = $autocompleter->doSearch(
             $gridField,
-            new HTTPRequest('GET', '/', array('gridfield_relationsearch' => 'Document Set'))
+            new HTTPRequest('GET', '/', ['gridfield_relationsearch' => 'Document Set'])
         );
 
         $this->assertContains('Document Set not linked', $jsonResult);

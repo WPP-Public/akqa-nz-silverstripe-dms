@@ -34,7 +34,7 @@ class DMSVersioningTest extends SapphireTest
      *
      * {@inheritDoc}
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -50,7 +50,7 @@ class DMSVersioningTest extends SapphireTest
      *
      * {@inheritDoc}
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         parent::tearDown();
 
@@ -72,7 +72,7 @@ class DMSVersioningTest extends SapphireTest
         $this->assertTrue(
             file_exists(
                 DMS::inst()->getStoragePath() . DIRECTORY_SEPARATOR . $document->Folder
-                . DIRECTORY_SEPARATOR . $document->Filename
+                    . DIRECTORY_SEPARATOR . $document->Filename
             ),
             "Document file copied into DMS folder"
         );

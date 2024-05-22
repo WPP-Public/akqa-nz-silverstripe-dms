@@ -24,10 +24,10 @@ class MigrateToDocumentSetsTask extends BuildTask
      * The valid actions that this task can perform (and the method that does them as the key)
      * @var array
      */
-    protected $validActions = array(
+    protected $validActions = [
         'createDefaultSet' => 'create-default-document-set',
         'reassignDocuments' => 'reassign-documents'
-    );
+    ];
 
     /**
      * @var SS_HTTPRequest
@@ -118,7 +118,7 @@ class MigrateToDocumentSetsTask extends BuildTask
             return $this;
         }
 
-        $query = SQLSelect::create(array('DMSDocumentID', 'SiteTreeID'), 'DMSDocument_Pages');
+        $query = SQLSelect::create(['DMSDocumentID', 'SiteTreeID'], 'DMSDocument_Pages');
         $result = $query->execute();
 
         foreach ($result as $row) {

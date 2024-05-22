@@ -10,7 +10,7 @@ use SilverStripe\Dev\SapphireTest;
 
 class DMSGridFieldAddNewButtonTest extends SapphireTest
 {
-    protected static $fixture_file = 'dms/tests/dmstest.yml';
+    protected static $fixture_file = 'dmstest.yml';
 
     /**
      * @var DMSGridFieldAddNewButton
@@ -22,7 +22,7 @@ class DMSGridFieldAddNewButtonTest extends SapphireTest
      */
     protected $gridField;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

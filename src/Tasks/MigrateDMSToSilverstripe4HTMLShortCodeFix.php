@@ -3,24 +3,15 @@
 
 namespace Sunnysideup\DMS\Tasks;
 
-use SilverStripe\Assets\File;
-use SilverStripe\Assets\Folder;
-use SilverStripe\Control\Director;
 use SilverStripe\CMS\Model\SiteTree;
-use SilverStripe\Core\Environment;
-use SilverStripe\Core\Flushable;
 use SilverStripe\Core\ClassInfo;
-use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Dev\BuildTask;
-use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
-use SilverStripe\SiteConfig\SiteConfig;
-use SilverStripe\Versioned\Versioned;
-
-
 use Sunnysideup\DMS\Model\DMSDocument;
-use Sunnysideup\DMS\Model\DMSDocumentSet;
 use Sunnysideup\MigrateData\Tasks\MigrateDataTask;
+
+if (!class_exists(MigrateDataTask::class)) {
+    return;
+}
 
 class MigrateDMSToSilverstripe4HTMLShortCodeFix extends MigrateDataTask
 {
@@ -34,17 +25,16 @@ class MigrateDMSToSilverstripe4HTMLShortCodeFix extends MigrateDataTask
     protected function performMigration()
     {
         $count = DMSDocument::get()->count();
-        $this->flushNow('DOING '.$count.' DMS DOCUMENTS');
+        $this->flushNow('DOING ' . $count . ' DMS DOCUMENTS');
         $idList = DMSDocument::get()->map('ID', 'OriginalDMSDocumentIDFile');
-        foreach($idList as $newID => $oldID) {
-            if($oldID) {
+        foreach ($idList as $newID => $oldID) {
+            if ($oldID) {
                 $this->flushNow('');
                 $this->flushNow('');
-                $this->flushNow('Searching for DMS Document with ID = '.$newID.' and OldID = '.$oldID);
+                $this->flushNow('Searching for DMS Document with ID = ' . $newID . ' and OldID = ' . $oldID);
                 $this->replaceShortCode($oldID, $newID);
             }
         }
-
     }
 
     /**
@@ -66,32 +56,32 @@ class MigrateDMSToSilverstripe4HTMLShortCodeFix extends MigrateDataTask
         $fields = $this->getShortCodeFields(SiteTree::class);
         foreach ($fields as $className => $fieldNames) {
             $tableName = $this->getSchemaForDataObject()->tableName($className);
-            $this->flushNow('... searching in '.$tableName);
-            if($this->tableExists($tableName)) {
+            $this->flushNow('... searching in ' . $tableName);
+            if ($this->tableExists($tableName)) {
                 foreach ($fieldNames as $fieldName => $fieldSpecs) {
-                    if($this->fieldExists($tableName, $fieldName)) {
-                        $oldPhrase = '[dms_document_link,id='.$oldID.']';
-                        $newPhrase = '[file_link,id='.$newID.']';
-                        $this->flushNow('... ... replacing '.$oldPhrase.' to '.$newPhrase.' in '.$tableName.'.'.$fieldName);
+                    if ($this->fieldExists($tableName, $fieldName)) {
+                        $oldPhrase = '[dms_document_link,id=' . $oldID . ']';
+                        $newPhrase = '[file_link,id=' . $newID . ']';
+                        $this->flushNow('... ... replacing ' . $oldPhrase . ' to ' . $newPhrase . ' in ' . $tableName . '.' . $fieldName);
                         $sql = '
-                            UPDATE "'.$tableName.'"
+                            UPDATE "' . $tableName . '"
                             SET
-                            "'.$tableName.'"."'.$fieldName.'" = REPLACE(
-                                "'.$tableName.'"."'.$fieldName.'",
-                                \''.$oldPhrase.'\',
-                                \''.$newPhrase.'\'
+                            "' . $tableName . '"."' . $fieldName . '" = REPLACE(
+                                "' . $tableName . '"."' . $fieldName . '",
+                                \'' . $oldPhrase . '\',
+                                \'' . $newPhrase . '\'
                             )
-                            WHERE "'.$tableName.'"."'.$fieldName.'" LIKE \'%'.$oldPhrase.'%\';
+                            WHERE "' . $tableName . '"."' . $fieldName . '" LIKE \'%' . $oldPhrase . '%\';
                         ';
                         // $this->flushNow($sql);
                         DB::query($sql);
-                        $this->flushNow('... ... ... DONE updated '.DB::affected_rows().' rows');
+                        $this->flushNow('... ... ... DONE updated ' . DB::affected_rows() . ' rows');
                     } else {
-                        $this->flushNow('... ... skipping '.$tableName.'.'.$fieldName.' (does not exist)');
+                        $this->flushNow('... ... skipping ' . $tableName . '.' . $fieldName . ' (does not exist)');
                     }
                 }
             } else {
-                $this->flushNow('... skipping: '.$tableName.' (does not exist)');
+                $this->flushNow('... skipping: ' . $tableName . ' (does not exist)');
             }
         }
     }
@@ -106,7 +96,7 @@ class MigrateDMSToSilverstripe4HTMLShortCodeFix extends MigrateDataTask
      */
     protected function getShortcodeFields($class)
     {
-        if(! isset($this->_classFieldCache[$class])) {
+        if (!isset($this->_classFieldCache[$class])) {
             $fields = [];
             $ancestry = array_values(ClassInfo::dataClassesFor($class));
 
@@ -133,5 +123,4 @@ class MigrateDMSToSilverstripe4HTMLShortCodeFix extends MigrateDataTask
 
         return $this->_classFieldCache[$class];
     }
-
 }

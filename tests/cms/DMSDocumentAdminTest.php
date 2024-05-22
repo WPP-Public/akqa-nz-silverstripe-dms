@@ -2,14 +2,13 @@
 
 use Sunnysideup\DMS\Cms\DMSDocumentAdmin;
 use Sunnysideup\DMS\Cms\DMSGridFieldAddNewButton;
-use Sunnysideup\DMS\Cms\DMSGridFieldEditButton;
 use SilverStripe\Dev\FunctionalTest;
 
 class DMSDocumentAdminTest extends FunctionalTest
 {
     protected static $fixture_file = 'DMSDocumentAdminTest.yml';
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -27,10 +26,9 @@ class DMSDocumentAdminTest extends FunctionalTest
         $form = $modelAdmin->getEditForm();
         $gridFieldConfig = $form->Fields()->first()->getConfig();
 
-        $replacements = array(
-            'GridFieldAddNewButton'=>DMSGridFieldAddNewButton::class,
-            'GridFieldEditButton'=>DMSGridFieldEditButton::class
-        );
+        $replacements = [
+            'GridFieldAddNewButton' => DMSGridFieldAddNewButton::class
+        ];
 
         foreach ($replacements as $oldClass => $newClass) {
             // Our button is an instance of the original, so is returned when asking for the original

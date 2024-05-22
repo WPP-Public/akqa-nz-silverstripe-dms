@@ -18,7 +18,7 @@ class DMSDocumentControllerTest extends SapphireTest
      */
     protected $controller;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -26,11 +26,11 @@ class DMSDocumentControllerTest extends SapphireTest
         $this->logInWithPermission('ADMIN');
 
         $this->controller = $this->getMockBuilder(DMSDocumentController::class)
-            ->setMethods(array('sendFile'))
+            ->setMethods(['sendFile'])
             ->getMock();
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         DMSFilesystemTestHelper::delete('assets/_unit-test-123');
         parent::tearDown();
@@ -69,9 +69,9 @@ class DMSDocumentControllerTest extends SapphireTest
      */
     public function behaviourProvider()
     {
-        return array(
-            array('open', 'inline'),
-            array('download', 'attachment')
-        );
+        return [
+            ['open', 'inline'],
+            ['download', 'attachment']
+        ];
     }
 }

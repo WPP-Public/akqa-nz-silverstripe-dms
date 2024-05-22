@@ -1,33 +1,20 @@
 <?php
 
-//1. check if DMSDocument Exists
-//2. foreach DMSDocument as item
-//3. create file
-//4. copy fields across
-//5, foreach DMS Document check that everything has been brough across to file
-//6. delete DMS Document fields, keeping the ones that need to be kept.
-//7. move DMS Document to its own location
-//
-
 namespace Sunnysideup\DMS\Tasks;
 
 use SilverStripe\Assets\File;
 use SilverStripe\Assets\Folder;
 use SilverStripe\Control\Director;
-use SilverStripe\CMS\Model\SiteTree;
-use SilverStripe\Core\Environment;
 use SilverStripe\Core\Flushable;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Dev\BuildTask;
-use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
 use SilverStripe\SiteConfig\SiteConfig;
-use SilverStripe\Versioned\Versioned;
-
-
 use Sunnysideup\DMS\Model\DMSDocument;
-use Sunnysideup\DMS\Model\DMSDocumentSet;
 use Sunnysideup\MigrateData\Tasks\MigrateDataTask;
+
+if (!class_exists(MigrateDataTask::class)) {
+    return;
+}
 
 class MigrateDMSToSilverstripe4 extends MigrateDataTask implements Flushable
 {
@@ -42,19 +29,20 @@ class MigrateDMSToSilverstripe4 extends MigrateDataTask implements Flushable
 
     public static function flush()
     {
-        if(! empty($_GET['rundmsmigration'])) {
+        if (!empty($_GET['rundmsmigration'])) {
             $oldFolder = ASSETS_PATH . '/_dmsassets';
             $newFolder = ASSETS_PATH . '/dmsassets';
-            if (file_exists($oldFolder) && ! file_exists($newFolder)) {
+            if (file_exists($oldFolder) && !file_exists($newFolder)) {
                 rename($oldFolder, $newFolder);
             } elseif (file_exists($oldFolder) && file_exists($newFolder)) {
-                user_error($oldFolder.' AND '.$newFolder.' exist! Please review ...', E_USER_NOTICE);
+                user_error($oldFolder . ' AND ' . $newFolder . ' exist! Please review ...', E_USER_NOTICE);
             }
 
             $obj = Injector::inst()->get('Sunnysideup\\MigrateData\\Tasks\\MigrateDataTask');
 
             if ($obj->tableExists('DMSDocument_versions')) {
-                if ($obj->fieldExists('DMSDocument_versions', 'Created') &&
+                if (
+                    $obj->fieldExists('DMSDocument_versions', 'Created') &&
                     $obj->fieldExists('DMSDocument_versions', 'LastEdited')
                 ) {
                     $obj->makeTableObsolete('DMSDocument_versions');
@@ -62,7 +50,8 @@ class MigrateDMSToSilverstripe4 extends MigrateDataTask implements Flushable
             }
 
             if ($obj->tableExists('DMSDocument')) {
-                if ($obj->fieldExists('DMSDocument', 'Created') &&
+                if (
+                    $obj->fieldExists('DMSDocument', 'Created') &&
                     $obj->fieldExists('DMSDocument', 'LastEdited')
                 ) {
                     $obj->makeTableObsolete('DMSDocument');
@@ -93,12 +82,12 @@ class MigrateDMSToSilverstripe4 extends MigrateDataTask implements Flushable
         $baseURL = Director::absoluteBaseURL();
         self::flush();
         $rows = DB::query('SELECT * FROM "_obsolete_DMSDocument";');
-        $this->flushNow('... selecting '.DB::affected_rows().' rows from _obsolete_DMSDocument');
+        $this->flushNow('... selecting ' . DB::affected_rows() . ' rows from _obsolete_DMSDocument');
         foreach ($rows as $row) {
             //new file system doesn't like using _ or 0 for folder names
-            $oldFolderName = '/dmsassets/'. $row['Folder'] .'';
+            $oldFolderName = '/dmsassets/' . $row['Folder'] . '';
             $folderNumber = $row['Folder'] ? $row['Folder'] : 'zero';
-            $newFolderName = 'dmsassets/'.$folderNumber.'';
+            $newFolderName = 'dmsassets/' . $folderNumber . '';
             if (!isset($this->_folderCache[$newFolderName])) {
                 $this->_folderCache[$newFolderName] = Folder::find_or_make($newFolderName);
             }
@@ -106,11 +95,11 @@ class MigrateDMSToSilverstripe4 extends MigrateDataTask implements Flushable
                 $myFolder = $this->_folderCache[$newFolderName];
                 $exists = File::get()->filter(['OriginalDMSDocumentIDFile' => $row['ID']])->count() ? true : false;
                 if ($exists) {
-                    $this->flushNow('Skipping File with ID '.$row['ID']);
+                    $this->flushNow('Skipping File with ID ' . $row['ID']);
                     //do nothing
                 } else {
-                    $this->flushNow('Doing: '.print_r($row, 1));
-                    $fullLocationFromAssets = $oldFolderName.'/'.$row['Filename'];
+                    $this->flushNow('Doing: ' . print_r($row, 1));
+                    $fullLocationFromAssets = $oldFolderName . '/' . $row['Filename'];
                     $fullLocationFromBase = ASSETS_PATH . $fullLocationFromAssets;
 
 
@@ -143,38 +132,38 @@ class MigrateDMSToSilverstripe4 extends MigrateDataTask implements Flushable
 
                         //in the obsolete one we already have a version 1. Above we write a file
                         //so we end up with version 1
-                        $sql = 'DELETE FROM "File_Versions" WHERE "RecordID" = '.$newFile->ID.' AND "Version" = 1;';
-                        $this->flushNow('... ... ... running - '.$sql);
+                        $sql = 'DELETE FROM "File_Versions" WHERE "RecordID" = ' . $newFile->ID . ' AND "Version" = 1;';
+                        $this->flushNow('... ... ... running - ' . $sql);
                         DB::query($sql);
 
-                        $sql = 'DELETE FROM "DMSDocument_Versions" WHERE "RecordID" = '.$newFile->ID.' AND "Version" = 1;';
-                        $this->flushNow('... ... ... running -'.$sql);
+                        $sql = 'DELETE FROM "DMSDocument_Versions" WHERE "RecordID" = ' . $newFile->ID . ' AND "Version" = 1;';
+                        $this->flushNow('... ... ... running -' . $sql);
                         DB::query($sql);
 
-                        if (! $this->tableExists('_obsolete_DMSDocument_versions')) {
+                        if (!$this->tableExists('_obsolete_DMSDocument_versions')) {
                             user_error('Table _obsolete_DMSDocument_versions does not exist. Error', E_USER_ERROR);
                         }
-                        $versionRows = DB::query('SELECT "ID" FROM "_obsolete_DMSDocument_versions" WHERE "DocumentID" = '.$row['ID']);
+                        $versionRows = DB::query('SELECT "ID" FROM "_obsolete_DMSDocument_versions" WHERE "DocumentID" = ' . $row['ID']);
                         foreach ($versionRows as $versionRow) {
-                            $this->flushNow('... adding row for DocumentID = '.$row['ID']);
+                            $this->flushNow('... adding row for DocumentID = ' . $row['ID']);
                             $sql = '
                                 INSERT
                                 INTO "File_Versions" (
                                     "RecordID",        "Version",           "Created",   "LastEdited", "Name",     "Title", "CanViewType", "CanEditType", "OriginalDMSDocumentIDFile",                  "ClassName"
                                 )
                                 SELECT
-                                    '.$newFile->ID .', "VersionCounter",    "Created",   "LastEdited", "Filename", "Title", "CanViewType", "CanEditType", '.$row['ID'].' AS OriginalDMSDocumentIDFile, \'Sunnysideup\\\\DMS\\\\Model\\\\DMSDocument\' as ClassNameInsert
+                                    ' . $newFile->ID . ', "VersionCounter",    "Created",   "LastEdited", "Filename", "Title", "CanViewType", "CanEditType", ' . $row['ID'] . ' AS OriginalDMSDocumentIDFile, \'Sunnysideup\\\\DMS\\\\Model\\\\DMSDocument\' as ClassNameInsert
                                 FROM "_obsolete_DMSDocument_versions"
-                                WHERE "ID" = '.$versionRow['ID'].';';
+                                WHERE "ID" = ' . $versionRow['ID'] . ';';
                             echo $sql;
                             DB::query($sql);
                             $id = DB::query('SELECT LAST_INSERT_ID();')->value();
-                            if (! $id) {
+                            if (!$id) {
                                 user_error('Could not find an ID from the last insert.');
                             }
-                            $testVersionCountForDMSDocumentTable = DB::query('SELECT COUNT("ID") FROM "DMSDocument_Versions" WHERE "ID" = '.$id);
-                            if (! $testVersionCountForDMSDocumentTable) {
-                                user_error('ID already exists in DMSDocument_Versions: '.$testVersionCountForDMSDocumentTable);
+                            $testVersionCountForDMSDocumentTable = DB::query('SELECT COUNT("ID") FROM "DMSDocument_Versions" WHERE "ID" = ' . $id);
+                            if (!$testVersionCountForDMSDocumentTable) {
+                                user_error('ID already exists in DMSDocument_Versions: ' . $testVersionCountForDMSDocumentTable);
                             }
                             $sql = '
                                 INSERT
@@ -182,9 +171,9 @@ class MigrateDMSToSilverstripe4 extends MigrateDataTask implements Flushable
                                     "ID",  "RecordID", "Version",  "Description", "ISBN", "ISSN", "CoverImageID", "CreatedByID", "LastEditedByID"
                                 )
                                 SELECT
-                                    '.$id.' AS ID, '.$newFile->ID .', "VersionCounter", "Description", "ISBN", "ISSN", '.$newFile->CoverImageID.', '.$newFile->CreatedByID.', "VersionAuthorID"
+                                    ' . $id . ' AS ID, ' . $newFile->ID . ', "VersionCounter", "Description", "ISBN", "ISSN", ' . $newFile->CoverImageID . ', ' . $newFile->CreatedByID . ', "VersionAuthorID"
                                 FROM "_obsolete_DMSDocument_versions"
-                                WHERE "ID" = '.$versionRow['ID'].';';
+                                WHERE "ID" = ' . $versionRow['ID'] . ';';
                             DB::query($sql);
                         }
 
@@ -204,7 +193,7 @@ class MigrateDMSToSilverstripe4 extends MigrateDataTask implements Flushable
                             ->filter(['ID' => $id])
                             ->count();
                         if ($testCount1 !== 1) {
-                            $this->flushNow('error in migration for row TEST 1 - could not find File Record, number of files found: '.$testCount1, 'error');
+                            $this->flushNow('error in migration for row TEST 1 - could not find File Record, number of files found: ' . $testCount1, 'error');
                             $this->flushNow('-----------------------------');
                             $this->flushNow('STOPPED');
                             $this->flushNow('-----------------------------');
@@ -216,8 +205,8 @@ class MigrateDMSToSilverstripe4 extends MigrateDataTask implements Flushable
                             echo $link;
 
                             $testLocation = str_replace($baseURL, $baseDirWithPublic, $link);
-                            if (! file_exists($testLocation)) {
-                                $this->flushNow('error in migration for row - could not find Actual File ('.$testLocation.')', 'error');
+                            if (!file_exists($testLocation)) {
+                                $this->flushNow('error in migration for row - could not find Actual File (' . $testLocation . ')', 'error');
                                 $this->flushNow('-----------------------------');
                                 $this->flushNow('STOPPED');
                                 $this->flushNow('-----------------------------');
@@ -228,15 +217,15 @@ class MigrateDMSToSilverstripe4 extends MigrateDataTask implements Flushable
                             $newFile->OriginalDMSDocumentIDFile = $row['ID'];
                             $newFile->write();
                         } else {
-                            $this->flushNow('ERROR: could not link to document ... ID = '.$newFile->ID.' we looked at '.$fullLocationFromAssets);
+                            $this->flushNow('ERROR: could not link to document ... ID = ' . $newFile->ID . ' we looked at ' . $fullLocationFromAssets);
                             die();
                         }
                     } else {
-                        $this->flushNow('Could not find: '.$fullLocationFromBase, 'error');
+                        $this->flushNow('Could not find: ' . $fullLocationFromBase, 'error');
                     }
                 }
             } else {
-                die('Could not create folder: '.$newFolderName);
+                die('Could not create folder: ' . $newFolderName);
             }
         }
 
@@ -273,41 +262,41 @@ class MigrateDMSToSilverstripe4 extends MigrateDataTask implements Flushable
 
     protected function getPostQueriesBuilder($table, $relation)
     {
-        $field = $relation.'ID';
+        $field = $relation . 'ID';
         if (!$this->tableExists($table)) {
-            $this->flushNow('Error: could not find the following table: '.$table);
+            $this->flushNow('Error: could not find the following table: ' . $table);
             die('');
         }
         //clean table
         $baseTable = $table;
         $baseTable = str_replace('_Live', '', $baseTable);
         $baseTable = str_replace('_Versions', '', $baseTable);
-        $originalDocumentIDField = 'OriginalDMSDocumentID'.$baseTable;
-        if (! $this->fieldExists($table, $originalDocumentIDField)) {
-            $this->flushNow('Error: could not find the following field: '.$originalDocumentIDField.' in '.$table);
+        $originalDocumentIDField = 'OriginalDMSDocumentID' . $baseTable;
+        if (!$this->fieldExists($table, $originalDocumentIDField)) {
+            $this->flushNow('Error: could not find the following field: ' . $originalDocumentIDField . ' in ' . $table);
             die('');
         }
-        if (! $this->fieldExists($table, $field)) {
-            $this->flushNow('Error: could not find the following field: '.$table.'.'.$field.'');
+        if (!$this->fieldExists($table, $field)) {
+            $this->flushNow('Error: could not find the following field: ' . $table . '.' . $field . '');
             die('');
         }
         $queries = [];
         foreach (['', '_Live', '_Versions'] as $tableExtensions) {
-            $fullTable = $table.$tableExtensions;
+            $fullTable = $table . $tableExtensions;
             if ($this->tableExists($fullTable)) {
                 $queries[] =
 
                     //set the OriginalDMSDocumentID if that has not been set yet ...
                     '
-                        UPDATE "'.$fullTable.'"
-                        SET "'.$fullTable.'"."'.$originalDocumentIDField.'" = "'.$fullTable.'"."'.$field.'"
+                        UPDATE "' . $fullTable . '"
+                        SET "' . $fullTable . '"."' . $originalDocumentIDField . '" = "' . $fullTable . '"."' . $field . '"
                         WHERE
                             (
-                                "'.$fullTable.'"."'.$originalDocumentIDField.'" = 0 OR
-                                "'.$fullTable.'"."'.$originalDocumentIDField.'" IS NULL
+                                "' . $fullTable . '"."' . $originalDocumentIDField . '" = 0 OR
+                                "' . $fullTable . '"."' . $originalDocumentIDField . '" IS NULL
                             ) AND (
-                                "'.$fullTable.'"."'.$field.'" > 0 AND
-                                "'.$fullTable.'"."'.$field.'" IS NOT NULL
+                                "' . $fullTable . '"."' . $field . '" > 0 AND
+                                "' . $fullTable . '"."' . $field . '" IS NOT NULL
                             );
                     ';
                 $queries[] =
@@ -315,13 +304,13 @@ class MigrateDMSToSilverstripe4 extends MigrateDataTask implements Flushable
                     //set the field to zero in case there is a DMS Link
                     //but the DMS link can not be made
                     '
-                        UPDATE "'.$fullTable.'"
+                        UPDATE "' . $fullTable . '"
                         LEFT JOIN "File"
-                            ON "File"."OriginalDMSDocumentIDFile" = "'.$fullTable.'"."'.$originalDocumentIDField.'"
-                        SET "'.$fullTable.'"."'.$field.'" = 0
+                            ON "File"."OriginalDMSDocumentIDFile" = "' . $fullTable . '"."' . $originalDocumentIDField . '"
+                        SET "' . $fullTable . '"."' . $field . '" = 0
                         WHERE
-                            "'.$fullTable.'"."'.$originalDocumentIDField.'" > 0 AND
-                            "'.$fullTable.'"."'.$originalDocumentIDField.'" IS NOT NULL AND
+                            "' . $fullTable . '"."' . $originalDocumentIDField . '" > 0 AND
+                            "' . $fullTable . '"."' . $originalDocumentIDField . '" IS NOT NULL AND
 
                             "File"."ID" IS NULL;
                     ';
@@ -329,16 +318,16 @@ class MigrateDMSToSilverstripe4 extends MigrateDataTask implements Flushable
 
                     //update to new value ... where there is a DMSDocument connection
                     '
-                        UPDATE "'.$fullTable.'"
+                        UPDATE "' . $fullTable . '"
                             INNER JOIN "File"
-                                ON "File"."OriginalDMSDocumentIDFile" = "'.$fullTable.'"."'.$originalDocumentIDField.'"
-                        SET "'.$fullTable.'"."'.$field.'" = "File"."ID"
+                                ON "File"."OriginalDMSDocumentIDFile" = "' . $fullTable . '"."' . $originalDocumentIDField . '"
+                        SET "' . $fullTable . '"."' . $field . '" = "File"."ID"
                         WHERE
-                            "'.$fullTable.'"."'.$originalDocumentIDField.'" > 0 AND
-                            "'.$fullTable.'"."'.$originalDocumentIDField.'" IS NOT NULL;
+                            "' . $fullTable . '"."' . $originalDocumentIDField . '" > 0 AND
+                            "' . $fullTable . '"."' . $originalDocumentIDField . '" IS NOT NULL;
                     ';
             } else {
-                $this->flushNow('Skipping '.$fullTable.' as this table does not exist.');
+                $this->flushNow('Skipping ' . $fullTable . ' as this table does not exist.');
             }
         }
 
@@ -348,7 +337,7 @@ class MigrateDMSToSilverstripe4 extends MigrateDataTask implements Flushable
     public function setMainDMSFolder()
     {
         $siteConfig = SiteConfig::current_site_config();
-        if (! $siteConfig->DMSFolderID) {
+        if (!$siteConfig->DMSFolderID) {
             $folder = Folder::find_or_make('dmsassets');
             $siteConfig->DMSFolderID = $folder->ID;
             $siteConfig->write();

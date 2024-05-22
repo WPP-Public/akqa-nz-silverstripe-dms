@@ -15,7 +15,7 @@ class DMSUploadField_ItemHandlerTest extends SapphireTest
      */
     protected $document;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
