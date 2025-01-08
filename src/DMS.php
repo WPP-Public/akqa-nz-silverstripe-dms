@@ -8,7 +8,31 @@ class DMS
 {
     use Configurable;
 
-    private static $folder_name = 'dms';
+    /**
+     * @var string
+     * @config
+     */
+    private static string $folder_name = 'dms';
 
-    private static $shortcode_handler_key = 'dms';
+    /**
+     * @var string
+     * @config
+     */
+    private static string $shortcode_handler_key = 'dms';
+
+    /**
+     * Get the shortcode handler key
+     */
+    public static function getShortcodeHandlerKey(): string
+    {
+        return self::config()->get('shortcode_handler_key');
+    }
+
+    /**
+     * Get the folder name
+     */
+    public static function getFolderName(): string
+    {
+        return self::config()->get('folder_name');
+    }
 }
