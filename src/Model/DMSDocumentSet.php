@@ -8,14 +8,13 @@ use SilverStripe\Security\Member;
 use SilverStripe\ORM\DataList;
 use SilverStripe\Security\Permission;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\Security\Security;
 
 /**
  * A document set is attached to Pages, and contains many DMSDocuments
  *
  * @property Varchar Title
- * @property  Text KeyValuePairs
- * @property  Enum SortBy
+ * @property Text KeyValuePairs
+ * @property Enum SortBy
  * @property Enum SortByDirection
  */
 class DMSDocumentSet extends DataObject
@@ -27,34 +26,34 @@ class DMSDocumentSet extends DataObject
 
     private static $plural_name = 'DMS Document Sets';
 
-    private static $db = [
+    private static $db = array(
         'Title' => 'Varchar(255)',
         'KeyValuePairs' => 'Text',
         'SortBy' => "Enum('LastEdited,Created,Title')')",
         'SortByDirection' => "Enum('DESC,ASC')')",
-    ];
+    );
 
-    private static $has_one = [
+    private static $has_one = array(
         'Page' => SiteTree::class,
-    ];
+    );
 
-    private static $many_many = [
+    private static $many_many = array(
         'Documents' => DMSDocument::class,
-    ];
+    );
 
-    private static $many_many_extraFields = [
-        'Documents' => [
+    private static $many_many_extraFields = array(
+        'Documents' => array(
             // Flag indicating if a document was added directly to a set - in which case it is set - or added
             // via the query-builder.
             'ManuallyAdded' => 'Boolean(1)',
             'DocumentSort' => 'Int'
-        ],
-    ];
+        ),
+    );
 
-    private static $summary_fields = [
+    private static $summary_fields = array(
         'Title' => 'Title',
         'Documents.Count' => 'No. Documents'
-    ];
+    );
 
     /**
      * Retrieve a list of the documents in this set. An extension hook is provided before the result is returned.
@@ -88,7 +87,7 @@ class DMSDocumentSet extends DataObject
     {
         return array_merge(
             (array) DMSDocument::create()->config()->get('display_fields'),
-            ['ManuallyAdded' => _t('DMSDocumentSet.ADDEDMETHOD', 'Added')]
+            array('ManuallyAdded' => _t('DMSDocumentSet.ADDEDMETHOD', 'Added'))
         );
     }
 
@@ -148,14 +147,14 @@ class DMSDocumentSet extends DataObject
     public function getGlobalPermission(Member $member = null)
     {
         if (!$member || !(is_a($member, Member::class)) || is_numeric($member)) {
-            $member = Security::getCurrentUser();
+            $member = Member::currentUser();
         }
 
         $result = (
             $member &&
             Permission::checkMember(
                 $member,
-                ['ADMIN', 'SITETREE_EDIT_ALL', 'CMS_ACCESS_DMSDocumentAdmin']
+                array('ADMIN', 'SITETREE_EDIT_ALL', 'CMS_ACCESS_DMSDocumentAdmin')
             )
         );
 

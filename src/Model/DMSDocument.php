@@ -2,7 +2,6 @@
 
 namespace Sunnysideup\DMS\Model;
 
-
 use Sunnysideup\DMS\Model\DMSDocumentSet;
 use SilverStripe\Assets\File;
 use SilverStripe\Assets\Image;
@@ -38,11 +37,12 @@ use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
 use SilverStripe\Forms\TabSet;
 use SilverStripe\Forms\Tab;
 use SilverStripe\SiteConfig\SiteConfig;
+use SilverStripe\Core\Injector\Injector;
+use SilverStripe\ORM\SS_List;
+use SilverStripe\Security\Security;
+use SilverStripe\View\HTML;
 use Sunnysideup\DMS\Interfaces\DMSDocumentInterface;
 use Sunnysideup\DMS\Admin\DMSDocumentAdmin;;
-
-use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Security\Security;
 
 /**
  * @package dms
@@ -61,8 +61,6 @@ use SilverStripe\Security\Security;
  */
 class DMSDocument extends File implements DMSDocumentInterface
 {
-
-
     private static $singular_name = 'Document';
 
     private static $plural_name = 'Documents';
@@ -169,12 +167,8 @@ class DMSDocument extends File implements DMSDocumentInterface
         return isset($types[$ext]) ? $types[$ext] : $ext;
     }
 
-    /**
-     * @return FieldList
-     */
-    public function getCMSFields()
+    public function getCMSFields(): FieldList
     {
-
         $siteConfig = SiteConfig::current_site_config();
         $fieldsForMain = [];
         $fieldsForDetails = [];
@@ -183,40 +177,42 @@ class DMSDocument extends File implements DMSDocumentInterface
         $fieldsForRelatedDocs = [];
         $fieldsForRelated = [];
         $fieldsForPermissions = [];
+
         if (!(Controller::curr() instanceof DMSDocumentAdmin)) {
             if ($this->exists()) {
                 $fieldsForMain[] = LiteralField::create(
                     'LinkToEdit',
-                    '<h2 style="text-align: center; padding-bottom: 30px;">«
-                        You can edit this DMS Document in the
-                        <a href="' . $this->CMSEditLink() . '" target="dms">DMS Document Editor</a>
-                    »</h2>'
+                    sprintf(
+                        '<h2 style="text-align: center; padding-bottom: 30px;">« You can edit this DMS Document in the <a href="%s" target="dms">DMS Document Editor</a> »</h2>',
+                        $this->CMSEditLink()
+                    )
                 );
             } else {
                 $fieldsForMain[] = LiteralField::create(
                     'LinkToEdit',
-                    '<h2 style="text-align: center; padding-bottom: 30px;">«
-                        You can add a new DMS Document in the
-                        <a href="' . $this->CMSAddLink() . '" target="dms">DMS Document Editor</a>
-                    »</h2>'
+                    sprintf(
+                        '<h2 style="text-align: center; padding-bottom: 30px;">« You can add a new DMS Document in the <a href="%s" target="dms">DMS Document Editor</a> »</h2>',
+                        $this->CMSAddLink()
+                    )
                 );
             }
         }
+
         if (!$siteConfig->DMSFolderID) {
-            $fieldsForMain[] = (LiteralField::create(
+            $fieldsForMain[] = LiteralField::create(
                 'DMSFolderMessage',
-                '<h2>You need to <a href="/admin/settings/" target="_blank">set</a> the folder for the DMS documents before you can create a DMS document.'
-            ));
+                '<h2>You need to <a href="/admin/settings/" target="_blank">set</a> the folder for the DMS documents before you can create a DMS document.</h2>'
+            );
         } else {
             if (!$this->ID) {
-                $uploadField = new UploadField('TempFile', 'File');
+                $uploadField = UploadField::create('TempFile', 'File');
                 $uploadField->setAllowedMaxFileNumber(1);
                 $fieldsForMain[] = $uploadField;
             } else {
                 $infoFields = $this->getFieldsForFile();
                 $fieldsForMain[] = $infoFields;
 
-                $uploadField = new UploadField('TempFile', 'Replace Current File');
+                $uploadField = UploadField::create('TempFile', 'Replace Current File');
                 $uploadField->setAllowedMaxFileNumber(1);
                 $fieldsForDetails[] = $uploadField;
 
@@ -241,12 +237,11 @@ class DMSDocument extends File implements DMSDocumentInterface
                 $fieldsForDetails[] = $coverImageField;
 
                 $gridFieldConfig = GridFieldConfig::create()->addComponents(
-                    new GridFieldToolbarHeader(),
-                    new GridFieldSortableHeader(),
-                    new GridFieldDataColumns(),
-                    new GridFieldPaginator(30),
-                    //new GridFieldEditButton(),
-                    new GridFieldDetailForm()
+                    GridFieldToolbarHeader::create(),
+                    GridFieldSortableHeader::create(),
+                    GridFieldDataColumns::create(),
+                    GridFieldPaginator::create(30),
+                    GridFieldDetailForm::create()
                 );
 
                 $gridFieldConfig->getComponentByType(GridFieldDataColumns::class)
@@ -258,7 +253,7 @@ class DMSDocument extends File implements DMSDocumentInterface
                     ->setFieldFormatting([
                         'Title' => sprintf(
                             '<a class=\"cms-panel-link\" href=\"%s/$ID\">$Title</a>',
-                            singleton(CMSPageEditController::class)->Link('show')
+                            CMSPageEditController::singleton()->Link('show')
                         )
                     ]);
 
@@ -275,13 +270,13 @@ class DMSDocument extends File implements DMSDocumentInterface
                     $fieldsForRelatedDocs[] = $this->getRelatedDocumentsGridField();
 
                     $versionsGridFieldConfig = GridFieldConfig::create()->addComponents(
-                        new GridFieldToolbarHeader(),
-                        new GridFieldSortableHeader(),
-                        new GridFieldDataColumns(),
-                        new GridFieldPaginator(30)
+                        GridFieldToolbarHeader::create(),
+                        GridFieldSortableHeader::create(),
+                        GridFieldDataColumns::create(),
+                        GridFieldPaginator::create(30)
                     );
 
-                    $versionsGrid =  GridField::create(
+                    $versionsGrid = GridField::create(
                         'Versions',
                         _t('DMSDocument.Versions', 'Versions'),
                         Versioned::get_all_versions(DMSDocument::class, $this->ID),
@@ -295,14 +290,9 @@ class DMSDocument extends File implements DMSDocumentInterface
             }
         }
 
-        $fields = new FieldList(
-            $rootTab = new TabSet(
-                "Root",
-                $tabBehaviour = new Tab(
-                    'Main'
-                )
-            )
-        );
+        $tab = TabSet::create('Root', Tab::create('Main'));
+        $fields = FieldList::create($tab);
+
         foreach ($fieldsForMain as $field) {
             $fields->addFieldToTab('Root.Main', $field);
         }
@@ -324,6 +314,7 @@ class DMSDocument extends File implements DMSDocumentInterface
         foreach ($fieldsForPermissions as $field) {
             $fields->addFieldToTab('Root.Permissions', $field);
         }
+
         $this->extend('updateCMSFields', $fields);
 
         return $fields;
@@ -335,33 +326,34 @@ class DMSDocument extends File implements DMSDocumentInterface
      *
      * @return CompositeField
      */
-    public function getPermissionsActionPanel()
+    public function getPermissionsActionPanel(): CompositeField
     {
         $fields = FieldList::create();
         $showFields = [
-            'CanViewType'  => '',
+            'CanViewType' => '',
             'ViewerGroups' => 'hide',
-            'CanEditType'  => '',
+            'CanEditType' => '',
             'EditorGroups' => 'hide',
         ];
-        /** @var SiteTree $siteTree */
-        $siteTree = singleton(SiteTree::class);
+        $siteTree = SiteTree::singleton();
         $settingsFields = $siteTree->getSettingsFields();
 
         foreach ($showFields as $name => $extraCss) {
             $compositeName = "Root.Settings.$name";
-            /** @var FormField $field */
-            if ($field = $settingsFields->fieldByName($compositeName)) {
-                $field->addExtraClass($extraCss);
-                $title = str_replace('page', 'document', $field->Title());
-                $field->setTitle($title);
+            $field = $settingsFields->fieldByName($compositeName);
 
-                // Remove Inherited source option from DropdownField
+            if ($field) {
+                $field->addExtraClass($extraCss);
+                $field->setTitle(str_replace('page', 'document', $field->Title()));
+
                 if ($field instanceof DropdownField) {
-                    $options = $field->getSource();
-                    unset($options['Inherit']);
-                    $field->setSource($options);
+                    $source = $field->getSource();
+                    if (isset($source['Inherit'])) {
+                        unset($source['Inherit']);
+                        $field->setSource($source);
+                    }
                 }
+
                 $fields->push($field);
             }
         }
@@ -371,46 +363,59 @@ class DMSDocument extends File implements DMSDocumentInterface
         return CompositeField::create($fields);
     }
 
-
     public function onBeforeWrite()
     {
         if ($currentUser = Security::getCurrentUser()) {
             if (!$this->CreatedByID) {
                 $this->CreatedByID = $currentUser->ID;
             }
-
             $this->LastEditedByID = $currentUser->ID;
         }
 
         if ($this->TempFileID) {
-            $file = File::get()->byID($this->TempFileID);
-            $doNotCopy = $this->Config()->do_not_copy;
-            $onlyCopyIfEmpty = $this->Config()->only_copy_if_empty;
+            $file = File::get()->byId($this->TempFileID);
+            $doNotCopy = $this->config()->get('do_not_copy') ?? [];
+            $onlyCopyIfEmpty = $this->config()->get('only_copy_if_empty') ?? [];
+
             if ($file && $file->exists()) {
                 $cols = $file->toMap();
                 foreach ($cols as $col => $val) {
-                    if (in_array($col, $doNotCopy)) {
-                        //do nothing
-                    } elseif (in_array($col, $onlyCopyIfEmpty)) {
-                        //check column in current record is empty before copying
-                        if (!$this->$col) {
-                            //copy value from File record to DMSDocument record
+                    if (in_array($col, $doNotCopy, true)) {
+                        continue;
+                    }
+
+                    if (in_array($col, $onlyCopyIfEmpty, true)) {
+                        // Check column in current record is empty before copying
+                        if (empty($this->$col)) {
                             $this->$col = $val;
                         }
-                    } else {
-                        //copy value from File record to DMSDocument record
-                        $this->$col = $val;
+                        continue;
                     }
+
+                    // Copy value from File record to DMSDocument record
+                    $this->$col = $val;
                 }
+
                 $this->TempFileID = 0;
+
                 $siteConfig = SiteConfig::current_site_config();
                 if ($siteConfig->DMSFolder() && $siteConfig->DMSFolder()->exists()) {
                     $this->ParentID = $siteConfig->DMSFolderID;
                 }
-                //delete the old file records
-                DB::query('DELETE FROM "File" WHERE "ID" =  ' . $file->ID);
-                DB::query('DELETE FROM "File_Live" WHERE "ID" =  ' . $file->ID);
-                DB::query('DELETE FROM "File_Versions" WHERE "RecordID" =  ' . $file->ID);
+
+                // Delete the old file records using parameterized queries
+                DB::prepared_query(
+                    'DELETE FROM "File" WHERE "ID" = ?',
+                    [$file->ID]
+                );
+                DB::prepared_query(
+                    'DELETE FROM "File_Live" WHERE "ID" = ?',
+                    [$file->ID]
+                );
+                DB::prepared_query(
+                    'DELETE FROM "File_Versions" WHERE "RecordID" = ?',
+                    [$file->ID]
+                );
             }
         }
 
@@ -437,18 +442,28 @@ class DMSDocument extends File implements DMSDocumentInterface
 
     /**
      * Returns a link to download this DMSDocument from the DMS store
-     * @return String
      */
-    public function getLink($versionID = 'latest')
+    public function getLink(?string $versionID = 'latest'): string
     {
         $linkID = $this->ID;
+
         if ($this->OriginalDMSDocumentIDFile) {
             $linkID = $this->OriginalDMSDocumentIDFile;
             $versionID = '';
         }
-        $urlSegment = sprintf('%d-%s', $linkID, URLSegmentFilter::create()->filter($this->getTitle()));
 
-        $result = Controller::join_links(Director::baseURL(), 'dmsdocument', $urlSegment, $versionID);
+        $urlSegment = sprintf(
+            '%d-%s',
+            $linkID,
+            URLSegmentFilter::create()->filter($this->getTitle())
+        );
+
+        $result = Controller::join_links(
+            Director::baseURL(),
+            'dmsdocument',
+            $urlSegment,
+            $versionID
+        );
 
         $this->extend('updateGetLink', $result);
 
@@ -471,65 +486,80 @@ class DMSDocument extends File implements DMSDocumentInterface
         return $this->ID . ' - ' . $this->Title;
     }
 
-    /**
-     * @return FieldList
-     */
-    protected function getFieldsForFile()
+    protected function getFieldsForFile(): CompositeField
     {
         $extension = $this->getExtension();
 
         $previewField = LiteralField::create(
-            "ImageFull",
-            '<img id="thumbnailImage" class="thumbnail-preview" src="' . $this->Icon($extension) . '"" alt="' . $this->Title . '"/>'
+            'ImageFull',
+            HTML::createTag('img', [
+                'id' => 'thumbnailImage',
+                'class' => 'thumbnail-preview',
+                'src' => $this->Icon($extension),
+                'alt' => $this->Title
+            ])
         );
 
-        //count the number of pages this document is published on
+        // Count the number of pages this document is published on
         $publishedOnCount = $this->getRelatedPages()->count();
-        $publishedOnValue = "$publishedOnCount pages";
-        if ($publishedOnCount == 1) {
-            $publishedOnValue = "$publishedOnCount page";
-        }
+        $publishedOnValue = $publishedOnCount === 1
+            ? '1 page'
+            : sprintf('%d pages', $publishedOnCount);
 
-        $fields =  CompositeField::create(
-            $filePreview = CompositeField::create(
-                CompositeField::create(
-                    $previewField
-                )->setName("FilePreviewImage")->addExtraClass('cms-file-info-preview'),
-                CompositeField::create(
-                    CompositeField::create(
-                        new ReadonlyField("ID", "ID number" . ':', $this->ID),
-                        new ReadonlyField(
-                            "FileType",
-                            _t('AssetTableField.TYPE', 'File type') . ':',
-                            self::get_file_type($extension)
-                        ),
-                        $urlField = LiteralField::create(
-                            'ClickableURL',
-                            '<div class="form-group field readonly">
-                                <label class="form__field-label">URL:</label>
-                                <div class="form__field-holder">
-                                    <a href="' . $this->getLink() . '" target="_blank" class="file-url">' . $this->getLink() . '</a>
-                                </div>
-                            </div>'
-                        ),
-                        ReadonlyField::create("FilenameWithoutIDField", "Filename" . ':', $this->fileName),
-                        new DateField_Disabled(
-                            "Created",
-                            _t('AssetTableField.CREATED', 'First uploaded') . ':',
-                            $this->Created
-                        ),
-                        new DateField_Disabled(
-                            "LastEdited",
-                            _t('AssetTableField.LASTEDIT', 'Last changed') . ':',
-                            $this->LastEdited
-                        ),
-                        new ReadonlyField("PublishedOn", "Published on" . ':', $publishedOnValue)
-                    )->setName('FilePreviewDataFields')
-                )->setName("FilePreviewData")->addExtraClass('cms-file-info-data')
-            )->setName("FilePreview")->addExtraClass('cms-file-info')
+        $urlField = LiteralField::create(
+            'ClickableURL',
+            sprintf(
+                '<div class="form-group field readonly">
+                <label class="form__field-label">URL:</label>
+                <div class="form__field-holder">
+                    <a href="%s" target="_blank" class="file-url">%s</a>
+                </div>
+            </div>',
+                $this->getLink(),
+                $this->getLink()
+            )
         );
 
-        $fields->addExtraClass('dmsdocument-documentdetails');
+        $filePreviewDataFields = CompositeField::create(
+            ReadonlyField::create('ID', 'ID number:', $this->ID),
+            ReadonlyField::create(
+                'FileType',
+                _t('AssetTableField.TYPE', 'File type') . ':',
+                self::get_file_type($extension)
+            ),
+            $urlField,
+            ReadonlyField::create('FilenameWithoutIDField', 'Filename:', $this->fileName),
+            DateField_Disabled::create(
+                'Created',
+                _t('AssetTableField.CREATED', 'First uploaded') . ':',
+                $this->Created
+            ),
+            DateField_Disabled::create(
+                'LastEdited',
+                _t('AssetTableField.LASTEDIT', 'Last changed') . ':',
+                $this->LastEdited
+            ),
+            ReadonlyField::create('PublishedOn', 'Published on:', $publishedOnValue)
+        )->setName('FilePreviewDataFields');
+
+        $filePreviewData = CompositeField::create(
+            $filePreviewDataFields
+        )->setName('FilePreviewData')
+            ->addExtraClass('cms-file-info-data');
+
+        $filePreviewImage = CompositeField::create(
+            $previewField
+        )->setName('FilePreviewImage')
+            ->addExtraClass('cms-file-info-preview');
+
+        $filePreview = CompositeField::create(
+            $filePreviewImage,
+            $filePreviewData
+        )->setName('FilePreview')
+            ->addExtraClass('cms-file-info');
+
+        $fields = CompositeField::create($filePreview)
+            ->addExtraClass('dmsdocument-documentdetails');
 
         $this->extend('updateFieldsForFile', $fields);
 
@@ -622,8 +652,8 @@ class DMSDocument extends File implements DMSDocumentInterface
     /**
      * Get the list of documents to show in "related documents". This can be modified via the extension point, for
      * example if you wanted to exclude embargoed documents or something similar.
-     *
-     * @return DataList
+     * 
+     * @return SS_List
      */
     protected function getRelatedDocumentsForAutocompleter()
     {
@@ -642,7 +672,7 @@ class DMSDocument extends File implements DMSDocumentInterface
         $valid = parent::validate();
 
         if ($this->CanViewType == 'OnlyTheseUsers' && !$this->ViewerGroups()->count()) {
-            $valid->error(
+            $valid->addError(
                 _t(
                     'DMSDocument.VALIDATIONERROR_NOVIEWERSELECTED',
                     "Selecting 'Only these people' from a viewers list needs at least one group selected."
@@ -651,7 +681,7 @@ class DMSDocument extends File implements DMSDocumentInterface
         }
 
         if ($this->CanEditType == 'OnlyTheseUsers' && !$this->EditorGroups()->count()) {
-            $valid->error(
+            $valid->addError(
                 _t(
                     'DMSDocument.VALIDATIONERROR_NOEDITORSELECTED',
                     "Selecting 'Only these people' from a editors list needs at least one group selected."
