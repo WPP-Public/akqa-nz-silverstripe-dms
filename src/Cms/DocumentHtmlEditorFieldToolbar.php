@@ -1,60 +1,67 @@
 <?php
 
-namespace Sunnysideup\DMS\Cms;
+namespace YourNamespace\Extensions;
 
-use SilverStripe\Forms\Form;
-use Sunnysideup\DMS\DMS;
-use SilverStripe\Forms\HiddenField;
 use SilverStripe\Core\Extension;
+use SilverStripe\Forms\Form;
+use SilverStripe\Forms\HiddenField;
+use Sunnysideup\DMS\Cms\DMSDocumentAddExistingField;
+use Sunnysideup\DMS\DMS;
 
-/**
- * Extends the original toolbar with document picking capability - modified lines are commented.
- */
-
-/**
-  * ### @@@@ START REPLACEMENT @@@@ ###
-  * WHY: upgrade to SS4
-  * OLD:  extends Extension (ignore case)
-  * NEW:  extends Extension (COMPLEX)
-  * EXP: Check for use of $this->anyVar and replace with $this->anyVar[$this->owner->ID] or consider turning the class into a trait
-  * ### @@@@ STOP REPLACEMENT @@@@ ###
-  */
 class DocumentHTMLEditorFieldToolbar extends Extension
 {
-    public function updateLinkForm(Form $form)
+    /**
+     * Update the HTML editor link form to include document linking functionality
+     *
+     * @param Form $form
+     * @return void
+     */
+    public function updateLinkForm(Form $form): void
     {
         $linkType = null;
         $fieldList = null;
-        $fields = $form->Fields();//->fieldByName('Heading');
+        $fields = $form->Fields();
+
+        // Find the LinkType field
         foreach ($fields as $field) {
-            $linkType = ($field->fieldByName('LinkType'));
-            $fieldList = $field;
-            if ($linkType) {
+            if ($linkTypeField = $field->fieldByName('LinkType')) {
+                $linkType = $linkTypeField;
+                $fieldList = $field;
                 break;
-            }   //break once we have the object
+            }
         }
 
+        // If we couldn't find the required fields, return early
+        if (!$linkType || !$fieldList) {
+            return;
+        }
+
+        // Add document option to link types
         $source = $linkType->getSource();
-        $source['document'] = 'Download a document';
+        $source['document'] = _t(
+            __CLASS__ . '.DOWNLOAD_DOCUMENT',
+            'Download a document'
+        );
         $linkType->setSource($source);
 
-        $addExistingField = new DMSDocumentAddExistingField('AddExisting', 'Add Existing');
-        $addExistingField->setForm($form);
-        $addExistingField->setUseFieldClass(false);
-        $fieldList->insertAfter($addExistingField, 'Description');
+        // Create and configure the add existing field
+        $addExistingField = DMSDocumentAddExistingField::create(
+            'AddExisting',
+            _t(__CLASS__ . '.ADD_EXISTING', 'Add Existing')
+        );
+        $addExistingField->setForm($form)
+            ->setUseFieldClass(false);
 
-        $fieldList->push(HiddenField::create('DMSShortcodeHandlerKey', false, DMS::inst()->getShortcodeHandlerKey()));
+        // Add the field after the Description field
+        $fieldList->insertAfter('Description', $addExistingField);
 
-        //      Requirements::javascript(SAPPHIRE_DIR . "/thirdparty/behaviour/behaviour.js");
-//      Requirements::javascript(SAPPHIRE_DIR . "/javascript/tiny_mce_improvements.js");
-//
-//      // create additional field, rebase to 'documents' directory
-//      $documents = new TreeDropdownField('document', 'Document', 'File', 'ID', 'DocumentDropdownTitle', true);
-//      $documents->setSearchFunction(array($this, 'documentSearchCallback'));
-//      $baseFolder = Folder::find_or_make(Document::$directory);
-//      $documents->setTreeBaseID($baseFolder->ID);
-
-
-        //return $form;
+        // Add the shortcode handler key
+        $fieldList->push(
+            HiddenField::create(
+                'DMSShortcodeHandlerKey',
+                false,
+                DMS::getShortcodeHandlerKey()
+            )
+        );
     }
 }
