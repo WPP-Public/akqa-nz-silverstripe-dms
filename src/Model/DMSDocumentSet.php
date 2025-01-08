@@ -8,6 +8,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\ORM\DataList;
 use SilverStripe\Security\Permission;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Security\Security;
 
 /**
  * A document set is attached to Pages, and contains many DMSDocuments
@@ -147,7 +148,7 @@ class DMSDocumentSet extends DataObject
     public function getGlobalPermission(Member $member = null)
     {
         if (!$member || !(is_a($member, Member::class)) || is_numeric($member)) {
-            $member = Member::currentUser();
+            $member = Security::getCurrentUser();
         }
 
         $result = (
