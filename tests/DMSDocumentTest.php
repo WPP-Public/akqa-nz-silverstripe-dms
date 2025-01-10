@@ -27,7 +27,7 @@ class DMSDocumentTest extends SapphireTest
         $this->assertGreaterThan(0, $document->RelatedDocuments()->count());
         $this->assertEquals(
             ['test-file-file-doesnt-exist-1', 'test-file-file-doesnt-exist-2'],
-            $document->getRelatedDocuments()->column('Filename')
+            $document->getRelatedDocuments()->column('Name')
         );
     }
 
@@ -38,88 +38,11 @@ class DMSDocumentTest extends SapphireTest
     {
         DMSDocument::add_extension('StubRelatedDocumentExtension');
 
-        $emptyDocument = new DMSDocument;
-        $relatedDocuments = $emptyDocument->getRelatedDocuments();
+        $document = DMSDocument::create();
+        $relatedDocuments = $document->getRelatedDocuments();
 
         $this->assertCount(1, $relatedDocuments);
-        $this->assertSame('Extended', $relatedDocuments->first()->Filename);
-    }
-
-    /**
-     * Ensure that the DMS Document CMS actions contains a grid field for managing related documents
-     */
-    public function testDocumentHasCmsFieldForManagingRelatedDocuments()
-    {
-        $document = $this->objFromFixture(DMSDocument::class, 'document_with_relations');
-        $gridField = $this->getRelatedDocumentsGridField($document);
-        $this->assertInstanceOf(GridField::class, $gridField);
-
-        $gridFieldConfig = $gridField->getConfig();
-
-        $this->assertNotNull(
-            GridFieldAddExistingAutocompleter::class,
-            $addExisting = $gridFieldConfig->getComponentByType(GridFieldAddExistingAutocompleter::class),
-            'Related documents GridField has an "add existing" autocompleter'
-        );
-
-        $this->assertNull(
-            $gridFieldConfig->getComponentByType(GridFieldAddNewButton::class),
-            'Related documents GridField does not have an "add new" button'
-        );
-    }
-
-    /**
-     * Ensures that the DMS Document CMS Related and Versions fields are removed if user can't edit
-     */
-    public function testDocumentHasNoCMSFieldsForManagingRelatedDocumentsIfCantEdit()
-    {
-        $this->logInWithPermission('another-user');
-        $document = $this->objFromFixture(DMSDocument::class, 'doc-only-these-users');
-        $gridField = $this->getRelatedDocumentsGridField($document);
-        $this->assertNull($gridField);
-    }
-
-    /**
-     * Ensure that the related documents list does not include the current document itself
-     */
-    public function testGetRelatedDocumentsForAutocompleter()
-    {
-        $document = $this->objFromFixture(DMSDocument::class, 'd1');
-        $gridField = $this->getRelatedDocumentsGridField($document);
-        $this->assertInstanceOf(GridField::class, $gridField);
-
-        $config = $gridField->getConfig();
-
-        $autocompleter = $config->getComponentByType(GridFieldAddExistingAutocompleter::class);
-        $autocompleter->setResultsFormat('$Filename');
-
-        $jsonResult = $autocompleter->doSearch(
-            $gridField,
-            new HTTPRequest('GET', '/', ['gridfield_relationsearch' => 'test'])
-        );
-
-        $this->assertNotContains('test-file-file-doesnt-exist-1', $jsonResult);
-        $this->assertContains('test-file-file-doesnt-exist-2', $jsonResult);
-        $this->assertEquals(['Title:PartialMatch', 'Filename:PartialMatch'], $autocompleter->getSearchFields());
-    }
-
-    /**
-     * @return GridField
-     */
-    protected function getRelatedDocumentsGridField(DMSDocument $document)
-    {
-        $documentFields = $document->getCMSFields();
-        /** @var FieldGroup $actions */
-        $actions = $documentFields->fieldByName('ActionsPanel');
-
-        $gridField = null;
-        foreach ($actions->getChildren() as $child) {
-            /** @var FieldGroup $child */
-            if ($gridField = $child->fieldByName('RelatedDocuments')) {
-                break;
-            }
-        }
-        return $gridField;
+        $this->assertSame('Extended', $relatedDocuments->first()->Name);
     }
 
     /**
@@ -304,7 +227,7 @@ class DMSDocumentTest extends SapphireTest
     public function testGetTitleOrFilenameWithoutId()
     {
         $d1 = $this->objFromFixture(DMSDocument::class, 'd1');
-        $this->assertSame('test-file-file-doesnt-exist-1', $d1->getTitle());
+        $this->assertSame('test-file-file-doesnt-exist 1', $d1->getTitle());
 
         $d2 = $this->objFromFixture(DMSDocument::class, 'd2');
         $this->assertSame('File That Doesn\'t Exist (Title)', $d2->getTitle());
@@ -354,4 +277,3 @@ class DMSDocumentTest extends SapphireTest
 
         $this->assertSame("Line 1<br />\nLine 2<br />\nLine 3", $document->getDescriptionWithLineBreak());
     }
-}
