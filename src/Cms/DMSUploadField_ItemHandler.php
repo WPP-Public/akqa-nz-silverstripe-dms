@@ -2,8 +2,6 @@
 
 namespace Sunnysideup\DMS\Cms;
 
-// use UploadField_ItemHandler;
-
 use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injectable;
@@ -16,10 +14,6 @@ class DMSUploadField_ItemHandler
     use Extensible;
     use Injectable;
 
-    /**
-     * @var array<string>
-     * @config
-     */
     private static array $allowed_actions = [
         'delete',
         'edit',

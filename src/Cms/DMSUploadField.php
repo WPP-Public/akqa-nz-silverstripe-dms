@@ -8,7 +8,6 @@ use Sunnysideup\DMS\DMS;
 use Sunnysideup\DMS\Model\DMSDocument;
 use Sunnysideup\DMS\Model\DMSDocumentSet;
 use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Core\Convert;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\View\Requirements;

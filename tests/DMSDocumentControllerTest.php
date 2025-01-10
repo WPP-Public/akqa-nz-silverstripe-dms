@@ -35,34 +35,6 @@ class DMSDocumentControllerTest extends SapphireTest
         DMSFilesystemTestHelper::delete('assets/_unit-test-123');
         parent::tearDown();
     }
-    //
-    // /**
-    //  * Test that the download behaviour is either "open" or "download"
-    //  *
-    //  * @param string $behaviour
-    //  * @param string $expectedDisposition
-    //  * @dataProvider behaviourProvider
-    //  */
-    // public function testDownloadBehaviourOpen($behaviour, $expectedDisposition)
-    // {
-    //     $self = $this;
-    //     $this->controller->expects($this->once())
-    //         ->method('sendFile')
-    //         ->will(
-    //             $this->returnCallback(function ($path, $mime, $name, $disposition) use ($self, $expectedDisposition) {
-    //                 $self->assertEquals($expectedDisposition, $disposition);
-    //             })
-    //         );
-    //
-    //     $openDoc = DMS::inst()->storeDocument('dms/tests/DMS-test-lorum-file.pdf');
-    //     $openDoc->DownloadBehavior = $behaviour;
-    //     $openDoc->clearEmbargo(false);
-    //     $openDoc->write();
-    //
-    //     $request = new HTTPRequest('GET', $openDoc->Link());
-    //     $request->match('dmsdocument/$ID');
-    //     $this->controller->index($request);
-    // }
 
     /**
      * @return array[]
