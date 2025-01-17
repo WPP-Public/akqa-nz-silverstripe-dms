@@ -27,34 +27,34 @@ class DMSDocumentSet extends DataObject
 
     private static $plural_name = 'DMS Document Sets';
 
-    private static $db = array(
+    private static $db = [
         'Title' => 'Varchar(255)',
         'KeyValuePairs' => 'Text',
         'SortBy' => "Enum('LastEdited,Created,Title')')",
         'SortByDirection' => "Enum('DESC,ASC')')",
-    );
+    ];
 
-    private static $has_one = array(
+    private static $has_one = [
         'Page' => SiteTree::class,
-    );
+    ];
 
-    private static $many_many = array(
+    private static $many_many = [
         'Documents' => DMSDocument::class,
-    );
+    ];
 
-    private static $many_many_extraFields = array(
-        'Documents' => array(
+    private static $many_many_extraFields = [
+        'Documents' => [
             // Flag indicating if a document was added directly to a set - in which case it is set - or added
             // via the query-builder.
             'ManuallyAdded' => 'Boolean(1)',
             'DocumentSort' => 'Int'
-        ),
-    );
+        ]
+    ];
 
-    private static $summary_fields = array(
+    private static $summary_fields = [
         'Title' => 'Title',
         'Documents.Count' => 'No. Documents'
-    );
+    ];
 
     /**
      * Retrieve a list of the documents in this set. An extension hook is provided before the result is returned.
@@ -88,7 +88,7 @@ class DMSDocumentSet extends DataObject
     {
         return array_merge(
             (array) DMSDocument::create()->config()->get('display_fields'),
-            array('ManuallyAdded' => _t('DMSDocumentSet.ADDEDMETHOD', 'Added'))
+            ['ManuallyAdded' => _t('DMSDocumentSet.ADDEDMETHOD', 'Added')]
         );
     }
 
@@ -155,7 +155,7 @@ class DMSDocumentSet extends DataObject
             $member &&
             Permission::checkMember(
                 $member,
-                array('ADMIN', 'SITETREE_EDIT_ALL', 'CMS_ACCESS_DMSDocumentAdmin')
+                ['ADMIN', 'SITETREE_EDIT_ALL', 'CMS_ACCESS_DMSDocumentAdmin']
             )
         );
 
