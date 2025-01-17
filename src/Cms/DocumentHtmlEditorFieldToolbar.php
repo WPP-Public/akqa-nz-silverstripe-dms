@@ -1,6 +1,6 @@
 <?php
 
-namespace YourNamespace\Extensions;
+namespace Sunnysideup\DMS\Cms;
 
 use SilverStripe\Core\Extension;
 use SilverStripe\Forms\Form;
