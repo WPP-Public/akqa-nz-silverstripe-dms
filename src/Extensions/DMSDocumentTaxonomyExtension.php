@@ -3,14 +3,12 @@
 namespace Sunnysideup\DMS\Extensions;
 
 use SilverStripe\Taxonomy\TaxonomyTerm;
-
 use SilverStripe\Core\Config\Config;
+use SilverStripe\Core\Extension;
 use Sunnysideup\DMS\Extensions\DMSTaxonomyTypeExtension;
-use SilverStripe\ORM\DataExtension;
 
-class DMSDocumentTaxonomyExtension extends DataExtension
+class DMSDocumentTaxonomyExtension extends Extension
 {
-
     private static $many_many = [
         'Tags' => TaxonomyTerm::class
     ];
@@ -35,6 +33,7 @@ class DMSDocumentTaxonomyExtension extends DataExtension
         );
 
         $map = [];
+
         foreach ($tags as $tag) {
             $nameParts = [$tag->Name];
             $currentTag = $tag;
@@ -46,6 +45,7 @@ class DMSDocumentTaxonomyExtension extends DataExtension
 
             $map[$tag->ID] = implode(' > ', $nameParts);
         }
+
         return $map;
     }
 }

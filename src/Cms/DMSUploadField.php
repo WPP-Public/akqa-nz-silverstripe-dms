@@ -8,7 +8,6 @@ use Sunnysideup\DMS\DMS;
 use Sunnysideup\DMS\Model\DMSDocument;
 use Sunnysideup\DMS\Model\DMSDocumentSet;
 use SilverStripe\Control\HTTPRequest;
-use SilverStripe\Core\Convert;
 use SilverStripe\Control\HTTPResponse;
 use SilverStripe\ORM\ArrayList;
 use SilverStripe\View\Requirements;
@@ -31,9 +30,7 @@ use SilverStripe\AssetAdmin\Forms\UploadField;
  */
 class DMSUploadField extends UploadField
 {
-    private static $allowed_actions = array(
-        "upload",
-    );
+    private static $allowed_actions = ['upload'];
 
     /**
      * The temporary folder name to store files in during upload
@@ -48,7 +45,7 @@ class DMSUploadField extends UploadField
      */
     protected function attachFile($file)
     {
-        $dms = DMS::inst();
+        $dms = singleton(DMS::class);
         $record = $this->getRecord();
 
         if ($record instanceof DMSDocument) {
@@ -171,7 +168,7 @@ class DMSUploadField extends UploadField
                     $document = $this->attachFile($file);
 
                     // Collect all output data.
-                    $return = array_merge($return, array(
+                    $return = array_merge($return, [
                         'id' => $document->ID,
                         'name' => $document->getTitle(),
                         'thumbnail_url' => $document->Icon($document->getExtension()),
@@ -179,13 +176,11 @@ class DMSUploadField extends UploadField
                         'size' => $document->getFileSizeFormatted(),
                         'buttons' => (string) $document->renderWith($this->getTemplateFileButtons()),
                         'showeditform' => true
-                    ));
-
-                    // CUSTOM END
+                    ]);
                 }
             }
         }
-        $response = new HTTPResponse(Convert::raw2json(array($return)));
+        $response = new HTTPResponse(json_encode([$return]));
         $response->addHeader('Content-Type', 'text/plain');
         return $response;
     }
@@ -206,10 +201,10 @@ class DMSUploadField extends UploadField
 
         // Replace the download template with a new one only when access the upload field through a GridField.
         // Needs to be enabled through setConfig('downloadTemplateName', 'ss-dmsuploadfield-downloadtemplate');
-        Requirements::javascript(DMS_DIR . '/javascript/DMSUploadField_downloadtemplate.js');
+        Requirements::javascript('./javascript/DMSUploadField_downloadtemplate.js');
 
         // In the add dialog, add the addtemplate into the set of file that load.
-        Requirements::javascript(DMS_DIR . '/javascript/DMSUploadField_addtemplate.js');
+        Requirements::javascript('./javascript/DMSUploadField_addtemplate.js');
 
         return $fields;
     }
@@ -218,7 +213,7 @@ class DMSUploadField extends UploadField
      * @param int $itemID
      * @return UploadField_ItemHandler
      */
-    public function getItemHandler($itemID)
+    public function getItemHandler(int $itemID): DMSUploadField_ItemHandler
     {
         return DMSUploadField_ItemHandler::create($this, $itemID);
     }

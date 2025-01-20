@@ -19,16 +19,14 @@ class DMSDocumentController extends Controller
      */
     protected static $testMode = false;
 
-    private static $allowed_actions = [
-        'index' => true
-    ];
+    private static $allowed_actions = ['index'];
 
     public function init()
     {
         Versioned::choose_site_stage($this->request);
+
         parent::init();
     }
-
 
     /**
      * Access the file download without redirecting user, so we can block direct
@@ -36,12 +34,12 @@ class DMSDocumentController extends Controller
      */
     public function index(HTTPRequest $request)
     {
-
         if ($this->request->getVar('test')) {
             if (Permission::check('ADMIN')) {
                 self::$testMode = true;
             }
         }
+
         $doc = $this->getDocumentFromID($request);
 
         if (!empty($doc)) {
@@ -51,6 +49,7 @@ class DMSDocumentController extends Controller
                 $baseDir = Director::baseFolder();
                 $baseDirWithPublic = $baseDir . '/public/';
                 $path = $baseDirWithPublic . $doc->getURL();
+
                 if ($doc->exists()) {
                     $fileBin = trim(`whereis file`);
                     if (function_exists('finfo_file')) {
@@ -80,6 +79,7 @@ class DMSDocumentController extends Controller
                     }
 
                     $disposition = 'attachment';
+
                     return $this->sendFile($path, $mime, $doc->Name, $disposition);
                 }
             }
@@ -88,6 +88,7 @@ class DMSDocumentController extends Controller
         if (self::$testMode) {
             return 'This asset does not exist.';
         }
+
         $this->httpError(404, 'This asset does not exist.');
     }
 
@@ -107,7 +108,7 @@ class DMSDocumentController extends Controller
         $versionID = Convert::raw2sql($request->param('VersionID'));
         $isLegacyLink = true;
 
-        //new scenario with version and id
+        // new scenario with version and id
         if ($versionID === 'latest') {
             $versionID = 0;
             $isLegacyLink = false;
@@ -118,11 +119,9 @@ class DMSDocumentController extends Controller
         $oldCaseVersioning = false;
 
         if (strpos($id, 'version') === 0) {
-            //special legacy case
+            // special legacy case
             $id = str_replace('version', '', $id);
             $oldCaseVersioning = true;
-        } else {
-            //standard case.
         }
 
         $id = $this->getDocumentIdFromSlug($id);
@@ -139,11 +138,7 @@ class DMSDocumentController extends Controller
         } elseif ($id) {
             $doc = DMSDocument::get()->byID(intval($id));
             $this->extend('updateDocumentFromID', $doc, $request);
-        } else {
-            //nothing!
         }
-
-        //more options
 
         return $doc;
     }

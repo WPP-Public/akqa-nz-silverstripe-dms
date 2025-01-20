@@ -2,15 +2,13 @@
 
 namespace Sunnysideup\DMS\Extensions;
 
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 
 /**
  * Creates default taxonomy type records if they don't exist already
  */
-
-class FileExtension extends DataExtension
+class FileExtension extends Extension
 {
-
     private static $db = [
         'OriginalDMSDocumentIDFile' => 'Int'
     ];

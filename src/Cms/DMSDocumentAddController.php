@@ -23,6 +23,7 @@ use SilverStripe\Security\Member;
 use SilverStripe\Security\Permission;
 use SilverStripe\Security\Security;
 use SilverStripe\Admin\LeftAndMain;
+use Sunnysideup\DMS\Admin\DMSDocumentAdmin;
 
 /**
  * @package dms
@@ -86,94 +87,95 @@ class DMSDocumentAddController extends LeftAndMain
         if ($id = $this->getRequest()->getVar('dsid')) {
             return DMSDocumentSet::get()->byId($id);
         }
+
         return singleton(DMSDocumentSet::class);
     }
 
     /**
      * @return Form
-     * @todo what template is used here? AssetAdmin_UploadContent.ss doesn't seem to be used anymore
      */
     public function getEditForm($id = null, $fields = null)
     {
-
-        /**
-         * ### @@@@ START REPLACEMENT @@@@ ###
-         * WHY: upgrade to SS4
-         * OLD: FRAMEWORK_DIR (ignore case)
-         * NEW: SilverStripe\Core\Manifest\ModuleLoader::getModule('silverstripe/framework')->getResource('UPGRADE-FIX-REQUIRED.php')->getRelativePath() (COMPLEX)
-         * EXP: Please review update and fix as required
-         * ### @@@@ STOP REPLACEMENT @@@@ ###
-         */
-        Requirements::javascript(SilverStripe\Core\Manifest\ModuleLoader::getModule('silverstripe/framework')->getResource('UPGRADE-FIX-REQUIRED.php')->getRelativePath() . '/javascript/AssetUploadField.js');
-        Requirements::css(SilverStripe\Core\Manifest\ModuleLoader::getModule('silverstripe/framework')->getResource('UPGRADE-FIX-REQUIRED.php')->getRelativePath() . '/css/AssetUploadField.css');
-        Requirements::css(DMS_DIR . '/dist/css/cmsbundle.css');
-
-        /** @var SiteTree $page */
-        $page = $this->currentPage();
-        /** @var DMSDocumentSet $documentSet */
         $documentSet = $this->getCurrentDocumentSet();
+        if (!$documentSet) {
+            throw new \RuntimeException('No document set found');
+        }
 
-        $uploadField = DMSUploadField::create('AssetUploadField', '');
-        $uploadField->setConfig('previewMaxWidth', 40);
-        $uploadField->setConfig('previewMaxHeight', 30);
-        // Required to avoid Solr reindexing (often used alongside DMS) to
-        // return 503s because of too many concurrent reindex requests
-        $uploadField->setConfig('sequentialUploads', 1);
-        $uploadField->addExtraClass('ss-assetuploadfield');
-        $uploadField->removeExtraClass('ss-uploadfield');
-        $uploadField->setTemplate('AssetUploadField');
-        $uploadField->setRecord($documentSet);
+        // Configure upload field
+        $uploadField = DMSUploadField::create('AssetUploadField', '')
+            ->setConfig('previewMaxWidth', 40)
+            ->setConfig('previewMaxHeight', 30)
+            ->setConfig('sequentialUploads', 1)
+            ->addExtraClass('ss-assetuploadfield')
+            ->removeExtraClass('ss-uploadfield')
+            ->setTemplate('AssetUploadField')
+            ->setRecord($documentSet);
 
-        $uploadField->getValidator()->setAllowedExtensions($this->getAllowedExtensions());
-        $exts = $uploadField->getValidator()->getAllowedExtensions();
+        // Set allowed extensions
+        $validator = $uploadField->getValidator();
+        $validator->setAllowedExtensions($this->getAllowedExtensions());
+        $extensions = $validator->getAllowedExtensions();
+        asort($extensions);
 
-        asort($exts);
+        // Create back link button
         $backlink = $this->Backlink();
-        $done = "
-		<a class=\"ss-ui-button ss-ui-action-constructive cms-panel-link ui-corner-all\" href=\"" . $backlink . "\">
-			" . _t('UploadField.DONE', 'DONE') . "
-		</a>";
-
-        $addExistingField = new DMSDocumentAddExistingField(
-            'AddExisting',
-            _t('DMSDocumentAddExistingField.ADDEXISTING', 'Add Existing')
-        );
-        $addExistingField->setRecord($documentSet);
-
-        $form = new Form(
-            $this,
-            'getEditForm',
-            new FieldList(
-                new TabSet(
-                    _t('DMSDocumentAddController.MAINTAB', 'Main'),
-                    new Tab(
-                        _t('UploadField.FROMCOMPUTER', 'From your computer'),
-                        $uploadField,
-                        new LiteralField(
-                            'AllowedExtensions',
-                            sprintf(
-                                '<p>%s: %s</p>',
-                                _t('AssetAdmin.ALLOWEDEXTS', 'Allowed extensions'),
-                                implode('<em>, </em>', $exts)
-                            )
-                        )
-                    ),
-                    new Tab(
-                        _t('UploadField.FROMCMS', 'From the CMS'),
-                        $addExistingField
-                    )
-                )
-            ),
-            new FieldList(
-                new LiteralField('doneButton', $done)
+        $doneButton = LiteralField::create(
+            'doneButton',
+            sprintf(
+                '<a class="ss-ui-button ss-ui-action-constructive cms-panel-link ui-corner-all" href="%s">%s</a>',
+                $backlink,
+                _t('UploadField.DONE', 'DONE')
             )
         );
-        $form->addExtraClass('center cms-edit-form ' . $this->BaseCSSClasses());
-        $form->Backlink = $backlink;
-        // Don't use AssetAdmin_EditForm, as it assumes a different panel structure
-        $form->setTemplate($this->getTemplatesWithSuffix('_EditForm'));
+
+        // Create add existing field
+        $addExistingField = DMSDocumentAddExistingField::create(
+            'AddExisting',
+            _t('DMSDocumentAddExistingField.ADDEXISTING', 'Add Existing')
+        )->setRecord($documentSet);
+
+        // Create allowed extensions field
+        $allowedExtensionsField = LiteralField::create(
+            'AllowedExtensions',
+            sprintf(
+                '<p>%s: %s</p>',
+                _t('AssetAdmin.ALLOWEDEXTS', 'Allowed extensions'),
+                implode('<em>, </em>', $extensions)
+            )
+        );
+
+        // Create tabs
+        $tabSet = TabSet::create(
+            _t('DMSDocumentAddController.MAINTAB', 'Main'),
+            Tab::create(
+                _t('UploadField.FROMCOMPUTER', 'From your computer'),
+                $uploadField,
+                $allowedExtensionsField
+            ),
+            Tab::create(
+                _t('UploadField.FROMCMS', 'From the CMS'),
+                $addExistingField
+            )
+        );
+
+        // Create form
+        $form = Form::create(
+            $this,
+            'getEditForm',
+            FieldList::create($tabSet),
+            FieldList::create($doneButton)
+        );
+
+        // Configure form
+        $form->addExtraClass(sprintf('center cms-edit-form %s', $this->BaseCSSClasses()))
+            ->setTemplate($this->getTemplatesWithSuffix('_EditForm'));
+
+        // Add hidden fields
         $form->Fields()->push(HiddenField::create('ID', false, $documentSet->ID));
         $form->Fields()->push(HiddenField::create('DSID', false, $documentSet->ID));
+
+        // Set backlink
+        $form->Backlink = $backlink;
 
         return $form;
     }
@@ -210,24 +212,21 @@ class DMSDocumentAddController extends LeftAndMain
      * 1) Page context: page ID and document set ID provided, redirect back to the page and document set
      * 2) Document set context: no page ID, document set ID provided, redirect back to document set in ModelAdmin
      * 3) Document context: no page ID and no document set ID provided, redirect back to documents in ModelAdmin
-     *
-     * @return string
      */
-    public function Backlink()
+    public function Backlink(): string
     {
         if (!$this->getRequest()->getVar('dsid') || !$this->currentPageID()) {
-            $modelAdmin = new DMSDocumentAdmin;
-            $modelAdmin->init();
+            $admin = DMSDocumentAdmin::create();
 
             if ($this->getRequest()->getVar('dsid')) {
                 return Controller::join_links(
-                    $modelAdmin->Link(DMSDocumentSet::class),
+                    $admin->Link(DMSDocumentSet::class),
                     'EditForm/field/DMSDocumentSet/item',
                     (int) $this->getRequest()->getVar('dsid'),
                     'edit'
                 );
             }
-            return $modelAdmin->Link();
+            return $admin->Link();
         }
 
         return $this->getPageEditLink($this->currentPageID(), (int) $this->getRequest()->getVar('dsid'));
@@ -269,7 +268,7 @@ class DMSDocumentAddController extends LeftAndMain
             );
         }
 
-        return Convert::raw2json($return);
+        return json_encode($return);
     }
 
     /**
@@ -302,7 +301,7 @@ class DMSDocumentAddController extends LeftAndMain
             );
         }
 
-        return Convert::raw2json($return);
+        return json_encode($return);
     }
 
     /**

@@ -3,15 +3,15 @@
 namespace Sunnysideup\DMS\Extensions;
 
 use SilverStripe\Assets\Folder;
+use SilverStripe\Core\Extension;
 use SilverStripe\Forms\DropdownField;
 use SilverStripe\Forms\FieldList;
-use SilverStripe\ORM\DataExtension;
 
 /**
  * Settings class to define site specific settings.
  */
 
-class DMSSettings extends DataExtension
+class DMSSettings extends Extension
 {
     private static $has_one = [
         'DMSFolder' => Folder::class

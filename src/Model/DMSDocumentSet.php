@@ -14,8 +14,8 @@ use SilverStripe\Security\Security;
  * A document set is attached to Pages, and contains many DMSDocuments
  *
  * @property Varchar Title
- * @property  Text KeyValuePairs
- * @property  Enum SortBy
+ * @property Text KeyValuePairs
+ * @property Enum SortBy
  * @property Enum SortByDirection
  */
 class DMSDocumentSet extends DataObject
@@ -48,7 +48,7 @@ class DMSDocumentSet extends DataObject
             // via the query-builder.
             'ManuallyAdded' => 'Boolean(1)',
             'DocumentSort' => 'Int'
-        ],
+        ]
     ];
 
     private static $summary_fields = [

@@ -6,8 +6,8 @@ use Sunnysideup\DMS\Cms\DMSDocumentAddController;
 use SilverStripe\Control\Controller;
 use Sunnysideup\DMS\Model\DMSDocumentSet;
 use SilverStripe\CMS\Controllers\CMSPageEditController;
+use SilverStripe\Forms\GridField\GridField;
 use SilverStripe\View\ArrayData;
-use Sunnysideup\DMS\Cms\DMSGridFieldAddNewButton;
 use SilverStripe\Forms\GridField\GridFieldAddNewButton;
 use SilverStripe\Forms\GridField\GridField_HTMLProvider;
 
@@ -21,47 +21,58 @@ class DMSGridFieldAddNewButton extends GridFieldAddNewButton implements GridFiel
     protected $documentSetId;
 
     /**
-     * Overriding the parent method to change the template that the DMS add button will be rendered with
+     * Get the HTML fragments for the add button
      *
-     * @param  GridField $gridField
-     * @return array
+     * @param GridField $gridField
      */
-    public function getHTMLFragments($gridField)
+    public function getHTMLFragments($gridField): array
     {
-        $singleton = singleton($gridField->getModelClass());
+        $modelClass = $gridField->getModelClass();
+        $singleton = $modelClass::singleton();
 
         if (!$singleton->canCreate()) {
-            return array();
+            return [];
         }
 
-        if (!$this->buttonName) {
-            // provide a default button name, can be changed by calling {@link setButtonName()} on this component
+        if (empty($this->buttonName)) {
             $objectName = $singleton->i18n_singular_name();
-            $this->buttonName = _t('GridField.Add', 'Add {name}', array('name' => $objectName));
+            $this->buttonName = _t(
+                'GridField.Add',
+                'Add {name}',
+                ['name' => $objectName]
+            );
         }
 
-        $link = singleton(DMSDocumentAddController::class)->Link();
-        if ($this->getDocumentSetId()) {
-            $link = Controller::join_links($link, '?dsid=' . $this->getDocumentSetId());
+        $link = DMSDocumentAddController::singleton()->Link();
+
+        // Add document set ID if available
+        $documentSetId = $this->getDocumentSetId();
+        if ($documentSetId) {
+            $link = Controller::join_links($link, '?dsid=' . $documentSetId);
 
             // Look for an associated page, but only share it if we're editing in a page context
-            $set = DMSDocumentSet::get()->byId($this->getDocumentSetId());
-            if ($set && $set->exists() && $set->Page()->exists()
+            $set = DMSDocumentSet::get()->byId($documentSetId);
+
+            if (
+                $set
+                && $set->exists()
+                && $set->Page()->exists()
                 && Controller::curr() instanceof CMSPageEditController
             ) {
                 $link = Controller::join_links($link, '?page_id=' . $set->Page()->ID);
             }
         }
 
-        $data = new ArrayData(array(
+        $data = ArrayData::create([
             'NewLink' => $link,
             'ButtonName' => $this->buttonName,
-        ));
+        ]);
 
-        return array(
-            $this->targetFragment => $data->renderWith(DMSGridFieldAddNewButton::class),
-        );
+        return [
+            $this->targetFragment => $data->renderWith(self::class)
+        ];
     }
+
 
     /**
      * Set the document set ID that this document should be attached to
