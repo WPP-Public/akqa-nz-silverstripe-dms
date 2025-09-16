@@ -2,6 +2,8 @@
 
 namespace Sunnysideup\DMS\Model;
 
+use Exception;
+use SilverStripe\Core\Manifest\ModuleResourceLoader;
 use Sunnysideup\DMS\Model\DMSDocumentSet;
 use SilverStripe\Assets\File;
 use SilverStripe\Assets\Image;
@@ -432,7 +434,14 @@ class DMSDocument extends File implements DMSDocumentInterface
      */
     public function Icon($ext)
     {
-        return "/resources/vendor/heyday/silverstripe-dms/client/images/app_icons/{$ext}_32.png";
+        $loader = ModuleResourceLoader::singleton();
+
+        // If the app icon doesn't exist, the loader will throw an exception, so we fallback to a generic icon instead
+        try {
+            return $loader->resolveURL("heyday/silverstripe-dms:client/images/app_icons/{$ext}_32.png");
+        } catch (Exception $e) {
+            return $loader->resolveURL("heyday/silverstripe-dms:client/images/app_icons/generic_32.png");
+        }
     }
 
     public function Link($versionID = 'latest')
@@ -652,7 +661,7 @@ class DMSDocument extends File implements DMSDocumentInterface
     /**
      * Get the list of documents to show in "related documents". This can be modified via the extension point, for
      * example if you wanted to exclude embargoed documents or something similar.
-     * 
+     *
      * @return SS_List
      */
     protected function getRelatedDocumentsForAutocompleter()
