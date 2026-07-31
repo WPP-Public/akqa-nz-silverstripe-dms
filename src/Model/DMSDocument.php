@@ -4,6 +4,7 @@ namespace Sunnysideup\DMS\Model;
 
 use Exception;
 use SilverStripe\Core\Manifest\ModuleResourceLoader;
+use SilverStripe\Core\Validation\ValidationResult;
 use Sunnysideup\DMS\Model\DMSDocumentSet;
 use SilverStripe\Assets\File;
 use SilverStripe\Assets\Image;
@@ -32,7 +33,7 @@ use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Forms\CompositeField;
 use SilverStripe\Forms\ReadonlyField;
 use SilverStripe\Forms\DateField_Disabled;
-use SilverStripe\ORM\ArrayList;
+use SilverStripe\Model\List\ArrayList;
 use SilverStripe\Forms\GridField\GridFieldConfig_RelationEditor;
 use SilverStripe\Forms\GridField\GridFieldAddNewButton;
 use SilverStripe\Forms\GridField\GridFieldAddExistingAutocompleter;
@@ -40,7 +41,7 @@ use SilverStripe\Forms\TabSet;
 use SilverStripe\Forms\Tab;
 use SilverStripe\SiteConfig\SiteConfig;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\ORM\SS_List;
+use SilverStripe\Model\List\SS_List;
 use SilverStripe\Security\Security;
 use SilverStripe\View\HTML;
 use Sunnysideup\DMS\Interfaces\DMSDocumentInterface;
@@ -676,7 +677,7 @@ class DMSDocument extends File implements DMSDocumentInterface
      *
      * @return ValidationResult
      */
-    public function validate()
+    public function validate(): ValidationResult
     {
         $valid = parent::validate();
 

@@ -3,6 +3,7 @@
 namespace Sunnysideup\DMS\Model;
 
 use SilverStripe\CMS\Model\SiteTree;
+use SilverStripe\Core\Validation\ValidationResult;
 use Sunnysideup\DMS\Model\DMSDocument;
 use SilverStripe\Security\Member;
 use SilverStripe\ORM\DataList;
@@ -92,7 +93,7 @@ class DMSDocumentSet extends DataObject
         );
     }
 
-    public function validate()
+    public function validate(): ValidationResult
     {
         $result = parent::validate();
 
@@ -145,7 +146,7 @@ class DMSDocumentSet extends DataObject
      * @param Member $member
      * @return bool
      */
-    public function getGlobalPermission(Member $member = null)
+    public function getGlobalPermission(?Member $member = null)
     {
         if (!$member || !(is_a($member, Member::class)) || is_numeric($member)) {
             $member = Security::getCurrentUser();

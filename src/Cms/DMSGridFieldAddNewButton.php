@@ -7,7 +7,7 @@ use SilverStripe\Control\Controller;
 use Sunnysideup\DMS\Model\DMSDocumentSet;
 use SilverStripe\CMS\Controllers\CMSPageEditController;
 use SilverStripe\Forms\GridField\GridField;
-use SilverStripe\View\ArrayData;
+use SilverStripe\Model\ArrayData;
 use SilverStripe\Forms\GridField\GridFieldAddNewButton;
 use SilverStripe\Forms\GridField\GridField_HTMLProvider;
 
