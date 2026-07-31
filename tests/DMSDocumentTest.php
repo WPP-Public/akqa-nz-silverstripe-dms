@@ -277,3 +277,4 @@ class DMSDocumentTest extends SapphireTest
 
         $this->assertSame("Line 1<br />\nLine 2<br />\nLine 3", $document->getDescriptionWithLineBreak());
     }
+}

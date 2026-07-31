@@ -4,16 +4,17 @@ namespace Sunnysideup\DMS\Cms;
 
 use Exception;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Core\Validation\ValidationResult;
 use Sunnysideup\DMS\DMS;
 use Sunnysideup\DMS\Model\DMSDocument;
 use Sunnysideup\DMS\Model\DMSDocumentSet;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Control\HTTPResponse;
-use SilverStripe\ORM\ArrayList;
+use SilverStripe\Model\List\ArrayList;
 use SilverStripe\View\Requirements;
 use SilverStripe\Forms\FieldList;
 use SilverStripe\Forms\FormAction;
-use SilverStripe\Forms\Validator;
+use SilverStripe\Forms\Validation\Validator;
 use SilverStripe\AssetAdmin\Forms\UploadField;
 
 /**
@@ -68,9 +69,9 @@ class DMSUploadField extends UploadField
         return $doc;
     }
 
-    public function validate($validator)
+    public function validate(): ValidationResult
     {
-        return true;
+        return ValidationResult::create();
     }
 
     /**

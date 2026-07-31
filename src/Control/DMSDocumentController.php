@@ -51,7 +51,7 @@ class DMSDocumentController extends Controller
                 $path = $baseDirWithPublic . $doc->getURL();
 
                 if ($doc->exists()) {
-                    $fileBin = trim(`whereis file`);
+                    $fileBin = trim((string) shell_exec('whereis file'));
                     if (function_exists('finfo_file')) {
                         // discover the mime type properly
                         $finfo = finfo_open(FILEINFO_MIME_TYPE);
@@ -59,7 +59,7 @@ class DMSDocumentController extends Controller
                     } elseif (is_executable($fileBin)) {
                         $path = escapeshellarg($path);
                         // try to use the system tool
-                        $mime = `$fileBin -i -b $path`;
+                        $mime = (string) shell_exec("$fileBin -i -b $path");
                         $mime = explode(';', $mime);
                         $mime = trim($mime[0]);
                     } else {

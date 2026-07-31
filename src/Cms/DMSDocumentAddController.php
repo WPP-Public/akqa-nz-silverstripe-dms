@@ -14,7 +14,8 @@ use SilverStripe\Forms\Form;
 use SilverStripe\Forms\HiddenField;
 use SilverStripe\CMS\Controllers\CMSPageEditController;
 use SilverStripe\Control\Controller;
-use SilverStripe\View\ArrayData;
+use SilverStripe\Model\ArrayData;
+use SilverStripe\ORM\DataObject;
 use SilverStripe\Core\Convert;
 use Sunnysideup\DMS\Model\DMSDocument;
 use SilverStripe\Core\Config\Config;
@@ -53,26 +54,22 @@ class DMSDocumentAddController extends LeftAndMain
     );
 
     /**
-     * Custom currentPage() method to handle opening the 'root' folder
-     *
-     * @return SiteTree
+     * Custom currentRecord() method to handle opening the 'root' folder
      */
-    public function currentPage()
+    public function currentRecord(): ?DataObject
     {
-        $id = $this->currentPageID();
+        $id = $this->currentRecordID();
         if ($id === 0) {
             return SiteTree::singleton();
         }
-        return parent::currentPage();
+        return parent::currentRecord();
     }
 
     /**
      * Return fake-ID "root" if no ID is found (needed to upload files into the root-folder). Otherwise the page ID
      * is passed in from the {@link DMSGridFieldAddNewButton}.
-     *
-     * @return int
      */
-    public function currentPageID()
+    public function currentRecordID(): ?int
     {
         return (int) $this->getRequest()->getVar('page_id');
     }
@@ -215,7 +212,7 @@ class DMSDocumentAddController extends LeftAndMain
      */
     public function Backlink(): string
     {
-        if (!$this->getRequest()->getVar('dsid') || !$this->currentPageID()) {
+        if (!$this->getRequest()->getVar('dsid') || !$this->currentRecordID()) {
             $admin = DMSDocumentAdmin::create();
 
             if ($this->getRequest()->getVar('dsid')) {
@@ -229,7 +226,7 @@ class DMSDocumentAddController extends LeftAndMain
             return $admin->Link();
         }
 
-        return $this->getPageEditLink($this->currentPageID(), (int) $this->getRequest()->getVar('dsid'));
+        return $this->getPageEditLink($this->currentRecordID(), (int) $this->getRequest()->getVar('dsid'));
     }
 
     /**

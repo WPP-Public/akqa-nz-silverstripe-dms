@@ -16,17 +16,18 @@
         }
     ],
     "require": {
-        "silverstripe/cms": "^4.0 || ^5.0",
-        "symbiote/silverstripe-gridfieldextensions": "*",
-        "silverstripe/asset-admin": "*",
-        "silverstripe/taxonomy": "*"
+        "php": "^8.3",
+        "silverstripe/cms": "^6",
+        "silverstripe/asset-admin": "^3",
+        "silverstripe/taxonomy": "^4",
+        "symbiote/silverstripe-gridfieldextensions": "^5"
     },
     "suggest": {
         "undefinedoffset/sortablegridfield": "Allow documents to be reordered via drag-and-drop"
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "2.4.x-dev"
+            "dev-silverstripe-6": "3.x-dev"
         },
         "expose": [
             "client"
@@ -44,6 +45,6 @@
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.6"
+        "phpunit/phpunit": "^11.5"
     }
 }

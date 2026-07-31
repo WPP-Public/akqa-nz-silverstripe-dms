@@ -1,7 +1,7 @@
 <?php
 
 use Sunnysideup\DMS\Model\DMSDocument;
-use SilverStripe\ORM\DataExtension;
+use SilverStripe\Core\Extension;
 use SilverStripe\Dev\TestOnly;
 
 /**
@@ -10,15 +10,7 @@ use SilverStripe\Dev\TestOnly;
  * @package dms
  */
 
-/**
-  * ### @@@@ START REPLACEMENT @@@@ ###
-  * WHY: upgrade to SS4
-  * OLD:  extends DataExtension (ignore case)
-  * NEW:  extends DataExtension (COMPLEX)
-  * EXP: Check for use of $this->anyVar and replace with $this->anyVar[$this->owner->ID] or consider turning the class into a trait
-  * ### @@@@ STOP REPLACEMENT @@@@ ###
-  */
-class StubRelatedDocumentExtension extends DataExtension implements TestOnly
+class StubRelatedDocumentExtension extends Extension implements TestOnly
 {
     /**
      * For method {@link DMSDocument::getRelatedDocuments}
